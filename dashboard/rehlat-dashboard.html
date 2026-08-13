@@ -1,0 +1,2347 @@
+<title>رحلة التغيير — لوحة المتابعة</title>
+
+<style>
+  /* ---------- tokens: light is the base, dark redefines only values ---------- */
+  :root {
+    --ground: #eef1f3;
+    --surface: #ffffff;
+    --surface-2: #e3e9ed;
+    --surface-3: #d7dfe4;
+    --line: #ccd6dc;
+    --line-strong: #b3c1c9;
+    --ink: #14202a;
+    --ink-2: #475a67;
+    --ink-3: #6f8492;
+    --accent: #8a6114;
+    --accent-bright: #b8821c;
+    --accent-ink: #ffffff;
+    --glow: rgba(184, 130, 28, 0.16);
+    --good: #1c7a55;
+    --good-bg: rgba(28, 122, 85, 0.1);
+    --warn: #96590f;
+    --warn-bg: rgba(150, 89, 15, 0.1);
+    --bad: #a33b3b;
+    --bad-bg: rgba(163, 59, 59, 0.1);
+    --shadow: 0 1px 2px rgba(20, 32, 42, 0.06), 0 8px 24px rgba(20, 32, 42, 0.06);
+
+    --sans: "Segoe UI", "SF Arabic", "Geeza Pro", "Noto Sans Arabic", Tahoma, system-ui, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+    --r: 10px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0e1418;
+      --surface: #161e24;
+      --surface-2: #1e282f;
+      --surface-3: #27333b;
+      --line: #2a363f;
+      --line-strong: #3a4954;
+      --ink: #e6edf2;
+      --ink-2: #a7b7c2;
+      --ink-3: #7a8b97;
+      --accent: #e0a845;
+      --accent-bright: #f2c169;
+      --accent-ink: #1a1204;
+      --glow: rgba(224, 168, 69, 0.22);
+      --good: #55b98d;
+      --good-bg: rgba(85, 185, 141, 0.13);
+      --warn: #dc9a52;
+      --warn-bg: rgba(220, 154, 82, 0.13);
+      --bad: #dd7676;
+      --bad-bg: rgba(221, 118, 118, 0.13);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 28px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0e1418;
+    --surface: #161e24;
+    --surface-2: #1e282f;
+    --surface-3: #27333b;
+    --line: #2a363f;
+    --line-strong: #3a4954;
+    --ink: #e6edf2;
+    --ink-2: #a7b7c2;
+    --ink-3: #7a8b97;
+    --accent: #e0a845;
+    --accent-bright: #f2c169;
+    --accent-ink: #1a1204;
+    --glow: rgba(224, 168, 69, 0.22);
+    --good: #55b98d;
+    --good-bg: rgba(85, 185, 141, 0.13);
+    --warn: #dc9a52;
+    --warn-bg: rgba(220, 154, 82, 0.13);
+    --bad: #dd7676;
+    --bad-bg: rgba(221, 118, 118, 0.13);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 28px rgba(0, 0, 0, 0.3);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 16px 64px; }
+
+  h1, h2, h3 { margin: 0; text-wrap: balance; font-weight: 700; letter-spacing: -0.015em; }
+  h1 { font-size: 1.25rem; }
+  h2 { font-size: 1.02rem; }
+  h3 { font-size: 0.94rem; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    box-shadow: var(--shadow);
+  }
+  .card > header {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 14px; border-bottom: 1px solid var(--line);
+  }
+  .card > .body { padding: 14px; }
+
+  button {
+    font: inherit; font-weight: 600; cursor: pointer;
+    border-radius: 8px; border: 1px solid var(--line-strong);
+    background: var(--surface-2); color: var(--ink);
+    padding: 7px 13px; transition: background 0.12s, border-color 0.12s, transform 0.06s;
+  }
+  button:hover:not(:disabled) { background: var(--surface-3); }
+  button:active:not(:disabled) { transform: translateY(1px); }
+  button:disabled { opacity: 0.42; cursor: not-allowed; }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--accent-bright); outline-offset: 2px;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  button.primary:hover:not(:disabled) { background: var(--accent-bright); border-color: var(--accent-bright); }
+  button.ghost { background: transparent; border-color: transparent; color: var(--ink-2); padding: 6px 9px; }
+  button.ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+  button.danger { color: var(--bad); border-color: var(--line-strong); background: transparent; }
+  button.danger:hover:not(:disabled) { background: var(--bad-bg); }
+  button.sm { padding: 5px 10px; font-size: 0.84rem; }
+
+  input, select, textarea {
+    font: inherit; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line-strong); border-radius: 8px; padding: 8px 11px;
+  }
+  input::placeholder, textarea::placeholder { color: var(--ink-3); }
+  textarea { resize: vertical; min-height: 74px; width: 100%; line-height: 1.5; }
+
+  label.check { display: inline-flex; align-items: center; gap: 7px; color: var(--ink-2); font-size: 0.88rem; cursor: pointer; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 9px; border-radius: 999px;
+    font-size: 0.74rem; font-weight: 700; white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .pill.good { color: var(--good); background: var(--good-bg); border-color: var(--good-bg); }
+  .pill.warn { color: var(--warn); background: var(--warn-bg); border-color: var(--warn-bg); }
+  .pill.bad  { color: var(--bad);  background: var(--bad-bg);  border-color: var(--bad-bg); }
+  .pill.mute { color: var(--ink-3); background: var(--surface-2); border-color: var(--line); }
+  .pill.gold { color: var(--accent); background: var(--glow); border-color: var(--glow); }
+
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+  .dot.live { animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .topbar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding-bottom: 16px; margin-bottom: 14px; border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; margin-inline-end: auto; }
+  .brand .mark {
+    width: 30px; height: 30px; border-radius: 8px; flex: none;
+    background: radial-gradient(circle at 50% 38%, var(--accent-bright), var(--accent) 62%, transparent 72%);
+    box-shadow: 0 0 16px var(--glow);
+  }
+  .brand small { display: block; color: var(--ink-3); font-size: 0.74rem; line-height: 1.2; }
+
+  /* ---------- section navigation (new, built from existing button styles) ---------- */
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tabs button.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+  /* ---------- day navigation ---------- */
+  .daynav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .daynav .when { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; }
+
+  .summary {
+    display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center;
+    padding: 16px;
+  }
+  .lantern {
+    --p: 0;
+    position: relative; width: 116px; height: 116px; border-radius: 50%; flex: none;
+    background: conic-gradient(var(--accent-bright) calc(var(--p) * 1%), var(--surface-2) 0);
+    display: grid; place-items: center;
+    transition: box-shadow 0.5s ease;
+  }
+  .lantern::after {
+    content: ""; position: absolute; inset: 9px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--line);
+  }
+  .lantern.lit { box-shadow: 0 0 0 1px var(--glow), 0 0 34px 6px var(--glow); }
+  .lantern .val { position: relative; z-index: 1; text-align: center; }
+  .lantern .val b { display: block; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 1.5rem; letter-spacing: -0.03em; }
+  .lantern .val span { display: block; font-size: 0.68rem; color: var(--ink-3); }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 12px; }
+  .stat { border-inline-start: 2px solid var(--line); padding-inline-start: 11px; }
+  .stat b { display: block; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 1.16rem; letter-spacing: -0.02em; }
+  .stat span { color: var(--ink-3); font-size: 0.76rem; }
+  .stat.gold { border-inline-start-color: var(--accent); }
+  .stat.good { border-inline-start-color: var(--good); }
+
+  .hint { color: var(--ink-2); font-size: 0.86rem; margin: 0; }
+
+  .cols { display: grid; grid-template-columns: 1.45fr 1fr; gap: 16px; align-items: start; }
+  .stack { display: grid; gap: 16px; }
+
+  .tasks { display: grid; gap: 8px; }
+  .task {
+    display: grid; grid-template-columns: 1fr auto; gap: 10px 12px; align-items: center;
+    padding: 11px 12px; border: 1px solid var(--line); border-radius: 9px;
+    background: var(--surface); transition: border-color 0.15s, background 0.15s;
+  }
+  .task.running { border-color: var(--accent); background: linear-gradient(90deg, var(--glow), transparent 55%); }
+  .task.completed { background: var(--surface-2); }
+  .task.completed .tname { color: var(--ink-2); }
+  .tname { font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tmeta { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-top: 3px; font-size: 0.75rem; color: var(--ink-3); }
+  .tclock { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 1.02rem; letter-spacing: -0.02em; }
+  .tclock.on { color: var(--accent); }
+  .tactions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  /* Note field sits on its own row under the task, spanning both columns. */
+  .tnote {
+    grid-column: 1 / -1; width: 100%; padding: 6px 10px; font-size: 0.86rem;
+    background: var(--surface-2); border-color: var(--line);
+  }
+  .tnoteread {
+    grid-column: 1 / -1; margin: 0; padding: 6px 10px; font-size: 0.86rem;
+    color: var(--ink-2); background: var(--surface-2); border-radius: 8px;
+  }
+
+  .board { display: grid; gap: 2px; }
+  .row {
+    display: grid; grid-template-columns: 24px 1fr auto; gap: 10px; align-items: center;
+    padding: 9px 10px; border-radius: 8px;
+  }
+  .row.me { background: var(--glow); }
+  .row .rk { font-family: var(--mono); font-size: 0.82rem; color: var(--ink-3); text-align: center; }
+  .row .nm { font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 7px; min-width: 0; }
+  .row .nm em { font-style: normal; color: var(--ink-3); font-weight: 500; font-size: 0.78rem; }
+  .row .pc { text-align: end; }
+  .row .pc b { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.94rem; }
+  .row .pc span { display: block; font-family: var(--mono); font-size: 0.72rem; color: var(--ink-3); }
+  .bar { grid-column: 1 / -1; height: 3px; border-radius: 2px; background: var(--surface-2); overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s ease; }
+  .bar i.done { background: var(--good); }
+  .bar.tall { height: 7px; border-radius: 4px; }
+
+  .scroll { overflow-x: auto; }
+  .vscroll { max-height: 340px; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  th, td { text-align: start; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+  td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* ---------- week strip (streaks) ---------- */
+  .weekstrip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .wday {
+    text-align: center; padding: 8px 2px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--surface);
+  }
+  .wday small { display: block; font-size: 0.66rem; color: var(--ink-3); }
+  .wday b { display: block; font-family: var(--mono); font-size: 0.9rem; margin-top: 2px; }
+  .wday.pass { background: var(--good-bg); border-color: var(--good-bg); color: var(--good); }
+  .wday.today { border-color: var(--accent); }
+  .wday.future { opacity: 0.4; }
+
+  /* ---------- streak rectangle ---------- */
+  .streakbox { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .sbox {
+    border: 1px solid var(--line); border-radius: 9px; padding: 12px;
+    background: var(--surface); display: grid; gap: 6px; align-content: start;
+  }
+  .sbox.hit { border-color: var(--accent); background: linear-gradient(160deg, var(--glow), transparent 70%); }
+  .sbox .cap { font-size: 0.78rem; color: var(--ink-3); font-weight: 600; }
+  .sbox .big {
+    font-family: var(--mono); font-variant-numeric: tabular-nums;
+    font-size: 1.7rem; line-height: 1.1; letter-spacing: -0.03em;
+  }
+  .sbox.hit .big { color: var(--accent); }
+  .sbox .goal { font-size: 0.74rem; color: var(--ink-3); }
+
+  /* ---------- podium ----------
+     Gold, silver and bronze are read off tokens already in the palette:
+     the accent is the gold, the neutral ink is the silver, and the warning
+     amber doubles as the bronze. No new hues enter the design. */
+  .row.rank1, .row.rank2, .row.rank3 { border: 1px solid transparent; }
+  .row.rank1 { background: var(--glow); border-color: var(--accent); }
+  .row.rank2 { background: var(--surface-2); border-color: var(--line-strong); }
+  .row.rank3 { background: var(--warn-bg); border-color: var(--warn-bg); }
+
+  .row.rank1 .nm > span:first-child { color: var(--accent); font-weight: 800; }
+  .row.rank2 .nm > span:first-child { color: var(--ink); font-weight: 800; }
+  .row.rank3 .nm > span:first-child { color: var(--warn); font-weight: 800; }
+
+  .medal {
+    display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+    font-family: var(--mono); font-size: 0.76rem; font-weight: 700;
+  }
+  .rank1 .medal { background: var(--accent); color: var(--accent-ink); box-shadow: 0 0 12px var(--glow); }
+  .rank2 .medal { background: var(--ink-3); color: var(--surface); }
+  .rank3 .medal { background: var(--warn); color: var(--surface); }
+
+  /* The leader's name gets a slow shimmer so it reads as the prize position. */
+  .row.rank1 .nm > span:first-child { animation: shimmer 3.2s ease-in-out infinite; }
+  @keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.72; } }
+
+  /* ---------- celebration ---------- */
+  .celebrate {
+    position: fixed; inset: 0; z-index: 70; display: grid; place-items: center;
+    background: rgba(6, 10, 13, 0.66); padding: 18px;
+  }
+  .celebrate .box {
+    background: var(--surface); border: 1px solid var(--accent); border-radius: 14px;
+    padding: 26px 24px; text-align: center; max-width: 380px; width: 100%;
+    box-shadow: 0 0 0 1px var(--glow), 0 0 60px 10px var(--glow);
+    animation: rise 0.42s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  @keyframes rise { from { transform: translateY(14px) scale(0.96); opacity: 0; } to { transform: none; opacity: 1; } }
+  .celebrate .lamp {
+    width: 62px; height: 62px; margin: 0 auto 14px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 38%, var(--accent-bright), var(--accent) 60%, transparent 72%);
+    box-shadow: 0 0 34px 8px var(--glow);
+    animation: flicker 1.8s ease-in-out infinite;
+  }
+  @keyframes flicker { 0%, 100% { opacity: 1; } 45% { opacity: 0.78; } }
+  .celebrate h3 { margin-bottom: 8px; font-size: 1.1rem; }
+  .celebrate p { margin: 0 0 16px; color: var(--ink-2); font-size: 0.92rem; }
+
+  /* ---------- quick jump ---------- */
+  .jump {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+    position: sticky; top: 0; z-index: 20; padding: 8px 0;
+    background: var(--ground); border-bottom: 1px solid var(--line);
+  }
+  .section { scroll-margin-top: 62px; }
+
+  /* ---------- newly added row flash ---------- */
+  .flash { animation: flash 1.6s ease-out; }
+  @keyframes flash { 0%, 40% { background: var(--glow); } 100% { background: transparent; } }
+
+  /* ---------- feed ---------- */
+  .feed { display: grid; gap: 7px; }
+  .fitem {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 9px; align-items: center;
+    padding: 8px 10px; border-radius: 8px; background: var(--surface-2);
+    font-size: 0.86rem;
+  }
+  .fitem.fresh { background: var(--glow); }
+  .fitem .who { font-weight: 700; }
+  .fitem time { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-3); }
+
+  /* ---------- report prose ---------- */
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 10px; }
+  .prose ul { margin: 0 0 12px; padding-inline-start: 20px; }
+  .prose li { margin-bottom: 6px; }
+  .prose strong { color: var(--ink); }
+  .lede { font-size: 1.02rem; color: var(--ink); font-weight: 600; margin-bottom: 12px; }
+
+  .note {
+    padding: 10px 12px; border-radius: 8px; font-size: 0.86rem;
+    background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line);
+  }
+  .note.gold { background: var(--glow); border-color: var(--glow); color: var(--ink); }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+
+  .login { max-width: 400px; margin: 6vh auto; }
+  .names { display: grid; gap: 7px; max-height: 320px; overflow-y: auto; }
+  .name-btn {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    width: 100%; text-align: start; padding: 11px 13px; font-weight: 600;
+  }
+  .pinrow { display: flex; gap: 8px; }
+  .pinrow input { flex: 1; text-align: center; letter-spacing: 0.55em; font-family: var(--mono); font-size: 1.15rem; padding-inline-start: 0.55em; }
+  .err { color: var(--bad); font-size: 0.86rem; margin: 0; min-height: 1.2em; }
+
+  .veil {
+    position: fixed; inset: 0; background: rgba(6, 10, 13, 0.62);
+    display: grid; place-items: center; padding: 18px; z-index: 40;
+  }
+  .modal { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; max-width: 400px; width: 100%; box-shadow: var(--shadow); }
+  .modal h3 { margin-bottom: 4px; }
+  .modal .choices { display: grid; gap: 8px; margin-top: 14px; }
+  .modal .choices button { padding: 11px 13px; text-align: start; }
+
+  .adminwrap { border-top: 2px solid var(--accent); }
+  .formrow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .formrow input[type="text"] { flex: 1; min-width: 160px; }
+  .field { display: grid; gap: 6px; margin-bottom: 12px; }
+  .field > label { font-size: 0.84rem; color: var(--ink-2); font-weight: 600; }
+
+  .empty { color: var(--ink-3); font-size: 0.88rem; text-align: center; padding: 22px 10px; margin: 0; }
+
+  .banner {
+    margin: 0 0 14px; padding: 9px 13px; border-radius: 8px;
+    background: var(--warn-bg); color: var(--warn);
+    border: 1px solid var(--warn-bg); font-size: 0.86rem; font-weight: 600;
+  }
+
+  .toast {
+    position: fixed; inset-inline: 0; bottom: 20px; margin-inline: auto; width: max-content; max-width: 90vw;
+    background: var(--ink); color: var(--ground); padding: 9px 16px; border-radius: 999px;
+    font-size: 0.86rem; font-weight: 600; z-index: 60; box-shadow: var(--shadow);
+  }
+
+  @media (max-width: 860px) {
+    .cols { grid-template-columns: 1fr; }
+    .summary { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+    .stat { border-inline-start: none; border-top: 2px solid var(--line); padding-inline-start: 0; padding-top: 7px; }
+    .stat.gold { border-top-color: var(--accent); }
+    .stat.good { border-top-color: var(--good); }
+    .task { grid-template-columns: 1fr; }
+    .tactions { justify-content: flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  /* ---------- print / PDF ---------- */
+  @media print {
+    :root { --ground: #fff; --surface: #fff; --surface-2: #f2f2f2; --line: #bbb; --ink: #000; --ink-2: #333; --ink-3: #666; }
+    body { background: #fff; color: #000; }
+    .topbar, .tabs, .daynav, button, .toast, .veil, .banner { display: none !important; }
+    .card { box-shadow: none; break-inside: avoid; }
+    .vscroll { max-height: none; overflow: visible; }
+    .printonly { display: block !important; }
+    .wrap { max-width: none; padding: 0; }
+  }
+  .printonly { display: none; }
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+/* =====================================================================
+   رحلة التغيير — participant tracking dashboard
+   All state lives in this browser's localStorage.
+   ===================================================================== */
+
+/* Bumped from v1: the participant roster changed from samples to the real
+   names, and old sample data would otherwise linger in people's browsers. */
+const STORE_KEY = 'rehla.v2';
+const PIN_LEN = 4;
+const WEEK_REQUIRED_DAYS = 3;
+const MONTH_REQUIRED_WEEKS = 4;   /* a month is four qualifying weeks */
+const APP_TZ = 'UTC';             /* fixed: one timezone for every day and week boundary */
+
+/* ---------------------------------------------------------------- i18n */
+const T = {
+  ar: {
+    dir: 'rtl', appName: 'رحلة التغيير', tagline: 'لوحة المتابعة الجماعية',
+    chooseName: 'اختر اسمك', back: 'رجوع',
+    enterPin: 'أدخل رمزك السري', setPin: 'اختر رمزك السري الجديد', confirmPin: 'أعد إدخال الرمز',
+    signIn: 'دخول', signOut: 'خروج', save: 'حفظ',
+    firstTime: 'أول دخول لك — الرمز الذي تختاره الآن يصبح رمزك الدائم.',
+    afterReset: 'صفّر المشرف رمزك. اختر رمزاً جديداً.',
+    newPin: 'رمز جديد', wrongPin: 'الرمز غير صحيح', pinMismatch: 'الرمزان غير متطابقين',
+    pinFormat: 'الرمز أربعة أرقام', tooMany: 'محاولات كثيرة. انتظر دقيقة.',
+    signInFailed: 'تعذّر الدخول. أعد المحاولة.',
+
+    tabToday: 'اليوم', tabProgress: 'التقدم', tabReport: 'التقارير', tabInsight: 'التحليل', tabAdmin: 'الإدارة',
+
+    today: 'اليوم', prevDay: 'اليوم السابق', nextDay: 'اليوم التالي', backToToday: 'العودة لليوم',
+    viewingPast: 'أنت تستعرض يوماً سابقاً — للقراءة فقط.',
+    daySummary: 'ملخص هذا اليوم', whoFinished: 'من أنجز', whoWorked: 'من اشتغل ولم يكمل', whoAbsent: 'لم يبدأ',
+    nobody: 'لا أحد',
+
+    startDay: 'ابدأ يومي', endDay: 'إنهاء اليوم', resumeDay: 'استئناف اليوم',
+    notStarted: 'لم تبدأ يومك', dayRunning: 'يومك جارٍ', dayDone: 'انتهى يومك',
+    allDone: 'أنجزت كل المهام', startHint: 'دخولك للوحة لا يبدأ يومك. اضغط «ابدأ يومي» حين تكون جاهزاً.',
+    myTasks: 'مهامي', start: 'ابدأ', pause: 'إيقاف', resume: 'استئناف', finish: 'إنهاء', reopen: 'إعادة فتح',
+    howEnded: 'كيف انتهت المهمة؟', didIt: 'أنجزتها', didItSub: 'تُحتسب في نسبتك اليومية',
+    triedIt: 'أنهيتها دون إنجاز', triedItSub: 'وقتك محفوظ، لكنها لا تُحتسب منجزة', cancel: 'إلغاء',
+    sIdle: 'لم تبدأ', sRunning: 'جارية', sPaused: 'متوقفة', sCompleted: 'منجزة', sAttempted: 'دون إنجاز',
+    noCount: 'خارج النسبة', pauses: 'إيقاف', reopens: 'إعادة فتح',
+    finishAll: 'إنهاء كل المتبقي كمنجز', confirmFinishAll: 'ستُحتسب {n} مهمة متبقية كمنجزة. متأكد؟',
+    doneList: 'المنجز', leftList: 'المتبقي', allTasksDone: 'أنجزت المهام كلها — {n} من {n}.',
+
+    workTime: 'وقت العمل الفعلي', done: 'المنجز', target: 'للهدف', targetMet: 'بلغت الهدف',
+    timeNote: 'يُحسب وقت العمل على المهام فقط — لا مدة فتح الصفحة.',
+    streaks: 'الستريك', streakD: 'الستريك اليومي', streakW: 'الستريك الأسبوعي', streakM: 'الستريك الشهري',
+    dayU: 'يوم', thisWeek: 'أيام هذا الأسبوع', weekRule: 'يكفي ٣ أيام ناجحة في الأسبوع',
+    monthRule: 'يكفي ٤ أسابيع ناجحة في الشهر', weekOf: 'أسبوع',
+    streakBox: 'الستريك', achieved: 'تحقق', notYet: 'لم يتحقق بعد',
+    podium: 'المتصدرون', first: 'الأول', second: 'الثاني', third: 'الثالث',
+    noteLabel: 'ملاحظة', notePlaceholder: 'اكتب ملاحظتك على هذه المهمة…',
+    parallelNote: 'يمكنك تشغيل عدة مهام معاً — كل مهمة تحسب وقتها الخاص.',
+    sumNote: 'الإجمالي = مجموع أوقات المهام، وقد يتجاوز الوقت المنقضي عند تشغيل مهام متوازية.',
+    dailyGoal: 'بلوغ ٩٠٪ اليوم', weeklyGoal: '٣ أيام ناجحة هذا الأسبوع', monthlyGoal: '٤ أسابيع ناجحة هذا الشهر',
+    celebrateD: 'أحسنت يا {name}! بلغت ٩٠٪ اليوم وسلسلتك الآن {n}.',
+    celebrateW: 'مبارك يا {name}! أكملت أسبوعاً ناجحاً.',
+    celebrateM: 'إنجاز كبير يا {name}! حقّقت شرط الشهر كاملاً.',
+    nice: 'تمام', groupStreaks: 'سلاسل الجميع',
+
+    everyone: 'لوحة الجميع', you: 'أنت', admin: 'مشرف', noOne: 'لا يوجد مشاركون',
+    history: 'أيامك السابقة', log: 'سجل الأحداث', noHistory: 'لا يوجد سجل بعد',
+    liveFeed: 'ما يحدث الآن', feedEmpty: 'لا حركة بعد اليوم',
+    date: 'التاريخ', pct: 'النسبة', time: 'الوقت', result: 'النتيجة', pass: 'ناجح', fail: 'دون الهدف',
+    participant: 'المشارك', tasksCol: 'المهام', streakCol: 'السلسلة',
+
+    dailyProgress: 'التقدم اليومي', last14: 'آخر ١٤ يوماً', groupToday: 'الجميع اليوم',
+    monthReport: 'التقرير الشهري', monthReportFor: 'تقرير شهر {m}', written: 'التقرير المكتوب', visual: 'العرض المرئي',
+    weeks: 'الأسابيع', activeTotal: 'إجمالي الوقت', successDays: 'أيام ناجحة', monthPass: 'حقق الشهر', monthFail: 'لم يحقق الشهر',
+
+    insight: 'تحليل أدائك', insightGroup: 'تحليل المجموعة', strengths: 'نقاط قوتك', weaknesses: 'ما يحتاج انتباهك',
+    advice: 'توصيات', noData: 'ابدأ يومك وسجّل بعض المهام حتى يصبح هناك ما يُحلَّل.',
+    analysisNote: 'هذا التحليل محسوب من بياناتك المسجّلة فعلاً — لا يُخمّن أي رقم.',
+
+    adminPanel: 'أدوات المشرف', people: 'المشاركون', tasksAdmin: 'المهام',
+    addPerson: 'إضافة', personName: 'اسم المشارك', taskName: 'اسم المهمة',
+    bulkNames: 'أضف عدة مشاركين — اسم في كل سطر', bulkAdd: 'إضافة الأسماء',
+    resetPin: 'تصفير الرمز', remove: 'إزالة', archive: 'أرشفة', restore: 'استعادة', rename: 'تسمية',
+    counts: 'تُحتسب', makeAdmin: 'مشرف', settings: 'الإعدادات',
+    exportCsv: 'تصدير إكسل', exportPdf: 'تصدير PDF', resetAll: 'مسح كل البيانات',
+    confirmReset: 'تصفير رمز {name}؟ سيختار رمزاً جديداً عند دخوله القادم.',
+    confirmRemove: 'إزالة {name}؟ سجله يبقى محفوظاً.',
+    confirmWipe: 'سيُمسح كل شيء: المشاركون والمهام والسجل. متأكد؟',
+    added: 'أُضيف {n}',
+
+    lang: 'English', saved: 'تم الحفظ', exported: 'تم التصدير', declined: 'أُلغي التصدير',
+    error: 'تعذّر إتمام العملية', exportOff: 'التصدير غير متاح هنا',
+    localOnly: 'البيانات محفوظة في هذا المتصفح فقط',
+    storageOff: 'هذا المتصفح يمنع الحفظ — تشتغل اللوحة لكن بياناتك تضيع عند التحديث.',
+    sameDevice: 'الإشعارات والتزامن تعمل بين المشاركين على هذا الجهاز فقط.'
+  },
+  en: {
+    dir: 'ltr', appName: 'Journey of Change', tagline: 'Shared progress dashboard',
+    chooseName: 'Choose your name', back: 'Back',
+    enterPin: 'Enter your PIN', setPin: 'Choose your new PIN', confirmPin: 'Re-enter the PIN',
+    signIn: 'Sign in', signOut: 'Sign out', save: 'Save',
+    firstTime: 'First sign in — the PIN you choose now becomes your permanent PIN.',
+    afterReset: 'An admin reset your PIN. Choose a new one.',
+    newPin: 'New PIN', wrongPin: 'Incorrect PIN', pinMismatch: 'The PINs do not match',
+    pinFormat: 'The PIN is four digits', tooMany: 'Too many attempts. Wait a minute.',
+    signInFailed: 'Could not sign in. Try again.',
+
+    tabToday: 'Today', tabProgress: 'Progress', tabReport: 'Reports', tabInsight: 'Analysis', tabAdmin: 'Admin',
+
+    today: 'Today', prevDay: 'Previous day', nextDay: 'Next day', backToToday: 'Back to today',
+    viewingPast: 'You are viewing a past day — read only.',
+    daySummary: 'Summary of this day', whoFinished: 'Reached the target', whoWorked: 'Worked, fell short', whoAbsent: 'Did not start',
+    nobody: 'nobody',
+
+    startDay: 'Start my day', endDay: 'End my day', resumeDay: 'Resume day',
+    notStarted: 'Your day has not started', dayRunning: 'Your day is running', dayDone: 'Your day has ended',
+    allDone: 'All tasks completed', startHint: 'Opening the dashboard does not start your day. Press Start my day when you are ready.',
+    myTasks: 'My tasks', start: 'Start', pause: 'Pause', resume: 'Resume', finish: 'Finish', reopen: 'Reopen',
+    howEnded: 'How did this task end?', didIt: 'I completed it', didItSub: 'Counts toward your daily percentage',
+    triedIt: 'Finished without completing', triedItSub: 'Your time is kept, but it does not count as done', cancel: 'Cancel',
+    sIdle: 'Not started', sRunning: 'Running', sPaused: 'Paused', sCompleted: 'Completed', sAttempted: 'Not completed',
+    noCount: 'Outside the percentage', pauses: 'pauses', reopens: 'reopens',
+    finishAll: 'Complete all remaining', confirmFinishAll: '{n} remaining task(s) will be marked completed. Are you sure?',
+    doneList: 'Completed', leftList: 'Remaining', allTasksDone: 'Every task completed — {n} of {n}.',
+
+    workTime: 'Actual working time', done: 'Completed', target: 'To target', targetMet: 'Target reached',
+    timeNote: 'Only active time on tasks counts — not how long the page stays open.',
+    streaks: 'Streak', streakD: 'Daily streak', streakW: 'Weekly streak', streakM: 'Monthly streak',
+    dayU: 'days', thisWeek: 'Days this week', weekRule: '3 successful days in a week is enough',
+    monthRule: '4 successful weeks in a month is enough', weekOf: 'Week of',
+    streakBox: 'Streak', achieved: 'Achieved', notYet: 'Not yet',
+    podium: 'Leading', first: 'First', second: 'Second', third: 'Third',
+    noteLabel: 'Note', notePlaceholder: 'Write a note on this task…',
+    parallelNote: 'You can run several tasks at once — each keeps its own time.',
+    sumNote: 'The total is the sum of task times, and can exceed elapsed time when tasks overlap.',
+    dailyGoal: 'Reach 90% today', weeklyGoal: '3 successful days this week', monthlyGoal: '4 successful weeks this month',
+    celebrateD: 'Well done {name}! You hit 90% today and your streak is now {n}.',
+    celebrateW: 'Congratulations {name}! You completed a successful week.',
+    celebrateM: 'Big one, {name}! You met the full month requirement.',
+    nice: 'Nice', groupStreaks: "Everyone's streaks",
+
+    everyone: 'Everyone', you: 'you', admin: 'Admin', noOne: 'No participants',
+    history: 'Your recent days', log: 'Activity log', noHistory: 'No history yet',
+    liveFeed: 'Happening now', feedEmpty: 'No activity yet today',
+    date: 'Date', pct: 'Percent', time: 'Time', result: 'Result', pass: 'Success', fail: 'Below target',
+    participant: 'Participant', tasksCol: 'Tasks', streakCol: 'Streak',
+
+    dailyProgress: 'Daily progress', last14: 'Last 14 days', groupToday: 'Everyone today',
+    monthReport: 'Monthly report', monthReportFor: 'Report for {m}', written: 'Written report', visual: 'Visual',
+    weeks: 'Weeks', activeTotal: 'Total time', successDays: 'Successful days', monthPass: 'Month achieved', monthFail: 'Month not achieved',
+
+    insight: 'Your analysis', insightGroup: 'Group analysis', strengths: 'Your strengths', weaknesses: 'Needs your attention',
+    advice: 'Recommendations', noData: 'Start your day and record some tasks so there is something to analyse.',
+    analysisNote: 'This analysis is computed from your recorded data only — no number is guessed.',
+
+    adminPanel: 'Admin tools', people: 'Participants', tasksAdmin: 'Tasks',
+    addPerson: 'Add', personName: 'Participant name', taskName: 'Task name',
+    bulkNames: 'Add several participants — one name per line', bulkAdd: 'Add these names',
+    resetPin: 'Reset PIN', remove: 'Remove', archive: 'Archive', restore: 'Restore', rename: 'Rename',
+    counts: 'Counts', makeAdmin: 'Admin', settings: 'Settings',
+    exportCsv: 'Export to Excel', exportPdf: 'Export PDF', resetAll: 'Erase all data',
+    confirmReset: "Reset {name}'s PIN? They will choose a new one at their next sign in.",
+    confirmRemove: '{name} will be removed. Their history is kept.',
+    confirmWipe: 'Everything will be erased: participants, tasks and history. Are you sure?',
+    added: '{n} added',
+
+    lang: 'العربية', saved: 'Saved', exported: 'Exported', declined: 'Export cancelled',
+    error: 'That did not go through', exportOff: 'Export is unavailable here',
+    localOnly: 'Data is stored in this browser only',
+    storageOff: 'This browser blocks saving — the dashboard works, but your data is lost on refresh.',
+    sameDevice: 'Notifications and syncing work between participants on this device only.'
+  }
+};
+let L = 'ar';
+const t = (k, v) => {
+  let s = (T[L] && T[L][k]) || T.ar[k] || k;
+  if (v) for (const [a, b] of Object.entries(v)) s = s.split('{' + a + '}').join(b);
+  return s;
+};
+const DAY_NAMES = {
+  ar: ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'],
+  en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+};
+
+/* Arabic counted nouns do not simply take an 's'. One and two have their own
+   forms, three to ten take the plural, and eleven upward returns to the
+   singular. Writing "4 مهمة" or "1 أسبوعاً" reads as broken Arabic, so every
+   generated sentence goes through here. */
+const AR_WORDS = {
+  task: { one: 'مهمة واحدة', two: 'مهمتين', few: 'مهام', many: 'مهمة' },
+  time: { one: 'مرة واحدة', two: 'مرتين', few: 'مرات', many: 'مرة' },
+  day: { one: 'يوم واحد', two: 'يومين', few: 'أيام', many: 'يوماً' },
+  dayDone: { one: 'يوم واحد ناجح', two: 'يومين ناجحين', few: 'أيام ناجحة', many: 'يوماً ناجحاً' },
+  dayLogged: { one: 'يوم واحد مسجّل', two: 'يومين مسجّلين', few: 'أيام مسجّلة', many: 'يوماً مسجّلاً' },
+  week: { one: 'أسبوع واحد ناجح', two: 'أسبوعين ناجحين', few: 'أسابيع ناجحة', many: 'أسبوعاً ناجحاً' },
+  person: { one: 'مشارك واحد', two: 'مشاركين', few: 'مشاركين', many: 'مشاركاً' }
+};
+function ar(n, kind) {
+  const w = AR_WORDS[kind];
+  if (n === 1) return w.one;
+  if (n === 2) return w.two;
+  if (n >= 3 && n <= 10) return n + ' ' + w.few;
+  return n + ' ' + w.many;
+}
+/* English side: plain pluralisation so both languages read naturally. */
+const en = (n, singular, plural) => `${n} ${n === 1 ? singular : (plural || singular + 's')}`;
+
+/* ------------------------------------------------------- calendar math */
+function dayKeyOf(ms) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: APP_TZ, year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date(ms));
+}
+const todayKey = () => dayKeyOf(Date.now());
+const weekdayOf = (d) => new Date(d + 'T12:00:00Z').getUTCDay();
+function addDays(d, n) {
+  const x = new Date(d + 'T12:00:00Z');
+  x.setUTCDate(x.getUTCDate() + n);
+  return x.toISOString().slice(0, 10);
+}
+const weekStartOf = (d) => addDays(d, -weekdayOf(d));
+const weekDaysOf = (d) => Array.from({ length: 7 }, (_, i) => addDays(weekStartOf(d), i));
+const monthKeyOf = (d) => d.slice(0, 7);
+
+function fmtDur(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  return [Math.floor(s / 3600), Math.floor(s % 3600 / 60), s % 60]
+    .map((n) => String(n).padStart(2, '0')).join(':');
+}
+function fmtMins(ms) {
+  const m = Math.round(ms / 60000);
+  if (m < 60) return m + (L === 'ar' ? ' د' : 'm');
+  return Math.floor(m / 60) + (L === 'ar' ? ' س ' : 'h ') + (m % 60) + (L === 'ar' ? ' د' : 'm');
+}
+/* A week's real calendar span, e.g. "2 Aug – 8 Aug". The month's weeks are the
+   actual Sundays of that month, so the label states the dates rather than an
+   invented "week 1". */
+function weekRange(weekStart) {
+  const weekEnd = addDays(weekStart, 6);
+  const fmt = (d) => new Intl.DateTimeFormat(L === 'ar' ? 'ar-u-nu-latn' : 'en-GB',
+    { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(d + 'T12:00:00Z'));
+  return `${fmt(weekStart)} – ${fmt(weekEnd)}`;
+}
+
+function fmtClock(ms) {
+  return new Intl.DateTimeFormat(L === 'ar' ? 'ar-SA-u-nu-latn' : 'en-GB',
+    { timeZone: APP_TZ, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
+  ).format(new Date(ms));
+}
+
+/* ---------------------------------------------------------- rules */
+const isDaySuccess = (done, total) => total > 0 && done * 100 >= total * 90;
+const pct = (done, total) => total > 0 ? Math.round(done / total * 10000) / 100 : 0;
+const needed = (done, total) => total > 0 ? Math.max(0, Math.ceil(total * 90 / 100) - done) : 0;
+
+function activeMs(intervals, now) {
+  let sum = 0;
+  for (const iv of intervals) {
+    const end = iv.end == null ? now : iv.end;
+    if (end > iv.start) sum += end - iv.start;
+  }
+  return sum;
+}
+
+/* ---------------------------------------------------------- state */
+let state = null;
+let ui = { pickedId: null, error: '', finishing: null, dayOffset: 0, seenFeed: 0, celebrate: null };
+let toastTimer = null;
+let storageOk = true;
+
+function seed() {
+  const now = Date.now();
+  const names = [
+    'عبدالله مو', 'مشاري', 'سامي', 'ادريس', 'حمزة', 'عبدالاله',
+    'عبدالعزيز جمكس', 'عبدالعزيز الشراري', 'احمد تويتش', 'محمد مدتر',
+    'زياد القصيمي', 'رازي'
+  ];
+  const ADMIN = 'سامي';
+  const taskNames = [
+    'صلاة الفجر في وقتها', 'قراءة ٢٠ صفحة', 'رياضة ٣٠ دقيقة', 'أذكار الصباح',
+    'مراجعة الدروس', 'شرب ٢ لتر ماء', 'ترتيب مهام الغد', 'النوم قبل ١٢'
+  ];
+  return {
+    settings: { seededAt: now },
+    /* celebrated[pid] = { daily: dayKey, weekly: weekStart, monthly: monthKey }
+       so a milestone is celebrated once, not on every render. */
+    celebrated: {},
+    participants: names.map((n, i) => ({
+      id: i + 1, name: n, pinHash: null, pinSalt: null, mustSetPin: true,
+      isAdmin: n === ADMIN, active: true
+    })),
+    tasks: taskNames.map((n, i) => ({ id: i + 1, name: n, counts: true, archived: false, pos: i })),
+    days: {},
+    log: [],
+    nextPid: names.length + 1,
+    nextTid: taskNames.length + 1,
+    session: null
+  };
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) { state = JSON.parse(raw); return; }
+  } catch (e) { storageOk = false; }
+  state = seed();
+  save();
+}
+function save() {
+  if (!storageOk) return;
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+  catch (e) { storageOk = false; }
+}
+
+/* ---------------------------------------------------------- PIN */
+async function hashPin(pin, salt) {
+  const input = salt + ':' + pin;
+  if (window.crypto && window.crypto.subtle) {
+    const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+  /* crypto.subtle exists only in a secure context; without this fallback a page
+     opened straight off disk would dead-end at the PIN screen. */
+  let h1 = 0x811c9dc5, h2 = 0x01000193;
+  for (let i = 0; i < input.length; i++) {
+    const c = input.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 16777619) >>> 0;
+    h2 = Math.imul(h2 + c + i, 2654435761) >>> 0;
+  }
+  return 'x' + h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0');
+}
+function newSalt() {
+  const bytes = new Uint8Array(8);
+  if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(bytes);
+  else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+const attempts = {};
+function throttled(id) {
+  const a = attempts[id];
+  if (!a) return false;
+  if (Date.now() - a.first > 60000) { delete attempts[id]; return false; }
+  return a.n >= 6;
+}
+function noteFail(id) {
+  const a = attempts[id];
+  if (!a || Date.now() - a.first > 60000) attempts[id] = { n: 1, first: Date.now() };
+  else a.n++;
+}
+
+/* ---------------------------------------------------------- access */
+const me = () => state.participants.find((p) => p.id === state.session) || null;
+const activeTasks = () => state.tasks.filter((x) => !x.archived).sort((a, b) => a.pos - b.pos);
+const taskById = (id) => state.tasks.find((x) => x.id === id);
+const personById = (id) => state.participants.find((x) => x.id === id);
+/* The day being looked at. Offset 0 is today; negatives walk backwards. */
+const viewedDay = () => addDays(todayKey(), ui.dayOffset);
+const isToday = () => ui.dayOffset === 0;
+
+function dayOf(pid, dk, create) {
+  if (!state.days[pid]) state.days[pid] = {};
+  let d = state.days[pid][dk];
+  if (!d && create) {
+    d = { startedAt: null, endedAt: null, state: 'not_started', endReason: null, tasks: {}, intervals: [] };
+    state.days[pid][dk] = d;
+  }
+  return d || null;
+}
+
+function logEvent(pid, event, taskId, detail) {
+  const at = Date.now();
+  state.log.push({ pid, taskId: taskId || null, dk: dayKeyOf(at), event, at, detail: detail || null });
+  if (state.log.length > 5000) state.log.splice(0, state.log.length - 5000);
+}
+
+/* ---------------------------------------------------------- day actions */
+function startDay(pid) {
+  const dk = todayKey();
+  const d = dayOf(pid, dk, true);
+  if (d.state === 'active') return;
+  if (d.state === 'ended') {
+    d.state = 'active'; d.endedAt = null; d.endReason = null;
+    logEvent(pid, 'day_started', null, 'resumed');
+  } else {
+    d.startedAt = Date.now();
+    d.state = 'active';
+    /* Creating the task rows here fixes today's denominator, so archiving a
+       task next week cannot retroactively change a percentage already earned. */
+    for (const task of activeTasks()) {
+      d.tasks[task.id] = { status: 'idle', completedAt: null, pauses: 0, reopens: 0, counts: task.counts };
+    }
+    logEvent(pid, 'day_started', null, null);
+  }
+  save();
+}
+
+function endDay(pid, reason) {
+  const dk = todayKey();
+  const d = dayOf(pid, dk, false);
+  if (!d || d.state !== 'active') return;
+  closeAllIntervals(d, Date.now());
+  for (const k of Object.keys(d.tasks)) if (d.tasks[k].status === 'running') d.tasks[k].status = 'paused';
+  d.state = 'ended';
+  d.endedAt = Date.now();
+  d.endReason = reason || 'manual';
+  logEvent(pid, 'day_ended', null, d.endReason);
+  save();
+}
+
+/* Several tasks may run at once, so "the open interval" is always per task. */
+const openIntervalFor = (d, taskId) => d.intervals.find((iv) => iv.taskId === taskId && iv.end == null) || null;
+const openIntervals = (d) => d.intervals.filter((iv) => iv.end == null);
+
+function closeTaskInterval(d, taskId, now) {
+  const iv = openIntervalFor(d, taskId);
+  if (!iv) return false;
+  iv.end = Math.max(now, iv.start);
+  return true;
+}
+
+/* Used when the day ends: nothing may be left running past the day. */
+function closeAllIntervals(d, now) {
+  for (const iv of openIntervals(d)) iv.end = Math.max(now, iv.start);
+}
+
+/* Tasks run in parallel by choice: starting one no longer stops another, so a
+   participant working on several things at once records each of them in full.
+   The consequence is deliberate — the daily total becomes the sum of task
+   times, which can exceed the wall clock when tasks overlap. */
+function startTask(pid, taskId) {
+  const d = dayOf(pid, todayKey(), false);
+  if (!d || d.state !== 'active') return;
+  const td = d.tasks[taskId];
+  if (!td || td.status === 'running' || td.status === 'completed') return;
+
+  d.intervals.push({ taskId, start: Date.now(), end: null });
+  const resuming = td.status === 'paused';
+  td.status = 'running';
+  logEvent(pid, resuming ? 'task_resumed' : 'task_started', taskId);
+  save();
+}
+
+function pauseTask(pid, taskId) {
+  const d = dayOf(pid, todayKey(), false);
+  if (!d || d.state !== 'active') return;
+  const td = d.tasks[taskId];
+  if (!td || td.status !== 'running') return;
+  closeTaskInterval(d, taskId, Date.now());
+  td.status = 'paused';
+  td.pauses++;
+  logEvent(pid, 'task_paused', taskId);
+  save();
+}
+
+/* Both outcomes keep the time. Only 'completed' counts toward the percentage —
+   an unsuccessful attempt is still real work and still worth recording. */
+function finishTask(pid, taskId, outcome, silent) {
+  const d = dayOf(pid, todayKey(), false);
+  if (!d || d.state !== 'active') return;
+  const td = d.tasks[taskId];
+  if (!td) return;
+  if (td.status === 'completed' && outcome === 'completed') return;
+
+  closeTaskInterval(d, taskId, Date.now());
+  td.status = outcome;
+  td.completedAt = outcome === 'completed' ? Date.now() : null;
+  logEvent(pid, outcome === 'completed' ? 'task_completed' : 'task_attempted', taskId);
+  if (!silent) save();
+
+  const counting = Object.values(d.tasks).filter((x) => x.counts);
+  if (counting.length && counting.every((x) => x.status === 'completed')) {
+    endDay(pid, 'auto_all_complete');
+    return;
+  }
+  save();
+}
+
+/* Mark everything still outstanding as completed in one action. */
+function finishAllRemaining(pid) {
+  const d = dayOf(pid, todayKey(), false);
+  if (!d || d.state !== 'active') return 0;
+  const left = Object.keys(d.tasks).filter((k) => d.tasks[k].status !== 'completed');
+  for (const k of left) finishTask(pid, Number(k), 'completed', true);
+  save();
+  return left.length;
+}
+
+function reopenTask(pid, taskId) {
+  const d = dayOf(pid, todayKey(), false);
+  if (!d) return;
+  const td = d.tasks[taskId];
+  if (!td || (td.status !== 'completed' && td.status !== 'attempted')) return;
+  const was = td.status;
+  td.status = 'paused';
+  td.completedAt = null;
+  td.reopens++;
+  if (d.state === 'ended') { d.state = 'active'; d.endedAt = null; d.endReason = null; }
+  logEvent(pid, 'task_reopened', taskId, 'was_' + was);
+  save();
+}
+
+/* ---------------------------------------------------------- derived */
+function dayStats(pid, dk, now) {
+  const d = dayOf(pid, dk, false);
+  if (!d) {
+    const list = activeTasks().filter((x) => x.counts);
+    return { d: null, done: 0, total: dk === todayKey() ? list.length : 0, ms: 0, pass: false, attempted: 0 };
+  }
+  const counting = Object.entries(d.tasks).filter(([, v]) => v.counts);
+  const done = counting.filter(([, v]) => v.status === 'completed').length;
+  return {
+    d, done, total: counting.length,
+    ms: activeMs(d.intervals, now),
+    pass: isDaySuccess(done, counting.length),
+    attempted: Object.values(d.tasks).filter((v) => v.status === 'attempted').length
+  };
+}
+
+function taskMs(d, taskId, now) {
+  if (!d) return 0;
+  return activeMs(d.intervals.filter((iv) => iv.taskId === taskId), now);
+}
+
+function successMap(pid) {
+  const m = {};
+  const days = state.days[pid] || {};
+  const now = Date.now();
+  for (const dk of Object.keys(days)) m[dk] = dayStats(pid, dk, now).pass;
+  return m;
+}
+
+function dailyStreak(m, today) {
+  /* Today is still in progress for most of its length, so a not-yet-successful
+     today does not break the streak — counting simply starts at yesterday. */
+  let cur = m[today] ? today : addDays(today, -1);
+  let n = 0;
+  while (m[cur]) { n++; cur = addDays(cur, -1); }
+  return n;
+}
+const weekDone = (m, dk) => weekDaysOf(dk).filter((d) => m[d]).length;
+function monthWeekList(dk) {
+  const mk = monthKeyOf(dk);
+  let cur = weekStartOf(mk + '-01');
+  if (monthKeyOf(cur) !== mk) cur = addDays(cur, 7);
+  const list = [];
+  while (monthKeyOf(cur) === mk) { list.push(cur); cur = addDays(cur, 7); }
+  return list;
+}
+const monthWeeks = (m, dk) => monthWeekList(dk).filter((w) => weekDone(m, w) >= WEEK_REQUIRED_DAYS).length;
+
+function leaderboard(now, dk) {
+  dk = dk || viewedDay();
+  return state.participants.filter((p) => p.active).map((p) => {
+    const s = dayStats(p.id, dk, now);
+    const m = successMap(p.id);
+    return {
+      p, done: s.done, total: s.total, ms: s.ms, pass: s.pass, attempted: s.attempted,
+      percent: pct(s.done, s.total),
+      state: s.d ? s.d.state : 'not_started',
+      streak: dailyStreak(m, dk), week: weekDone(m, dk)
+    };
+  }).sort((a, b) => {
+    if (b.percent !== a.percent) return b.percent - a.percent;
+    if (b.done !== a.done) return b.done - a.done;
+    /* Among people on the same score, finishing in less time is the better
+       result — but only once something has actually been finished. At zero
+       completed, less time just means "has not started". */
+    if (a.done > 0) { if (a.ms !== b.ms) return a.ms - b.ms; }
+    else if (a.ms !== b.ms) return b.ms - a.ms;
+    return a.p.name.localeCompare(b.p.name);
+  });
+}
+
+/* ---------------------------------------------------------- helpers */
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function toast(msg) {
+  const old = document.querySelector('.toast');
+  if (old) old.remove();
+  clearTimeout(toastTimer);
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.setAttribute('role', 'status');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  toastTimer = setTimeout(() => el.remove(), 2600);
+}
+
+/* =====================================================================
+   Rendering
+   ===================================================================== */
+const app = () => document.getElementById('app');
+
+/* Replacing innerHTML throws the page back to the top and drops focus, which is
+   why a freshly added task could not be reached and typing felt broken. Capture
+   position and caret, then put them back. */
+function render() {
+  document.documentElement.lang = L;
+  document.documentElement.dir = T[L].dir;
+
+  const y = window.scrollY;
+  const focused = document.activeElement;
+  const focusId = focused && focused.id ? focused.id : null;
+  const caret = focused && typeof focused.selectionStart === 'number' ? focused.selectionStart : null;
+
+  /* Rebuilding innerHTML creates brand new fields, so anything half-typed is
+     wiped. Carry the values across too, or a background tick can erase a name
+     mid-word. Handlers clear their field before calling render, and since this
+     snapshot is taken after that, an intentional clear still sticks. */
+  const values = {};
+  for (const el of app().querySelectorAll('input[id], textarea[id], select[id]')) {
+    values[el.id] = el.type === 'checkbox' || el.type === 'radio' ? el.checked : el.value;
+  }
+
+  app().innerHTML = state.session ? viewDashboard() : viewLogin();
+  wire();
+  tick();
+
+  for (const [id, value] of Object.entries(values)) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    if (el.type === 'checkbox' || el.type === 'radio') el.checked = value;
+    else el.value = value;
+  }
+
+  if (focusId) {
+    const again = document.getElementById(focusId);
+    if (again) {
+      again.focus();
+      if (caret != null && typeof again.setSelectionRange === 'function') {
+        try { again.setSelectionRange(caret, caret); } catch (e) { /* not a text field */ }
+      }
+    }
+  }
+  window.scrollTo(0, y);
+}
+
+/* ------------------------------------------------------------ login */
+function viewLogin() {
+  const p = ui.pickedId ? personById(ui.pickedId) : null;
+  const langBtn = `<button class="ghost sm" data-lang>${esc(t('lang'))}</button>`;
+
+  if (!p) {
+    const list = state.participants.filter((x) => x.active);
+    return `
+      <div class="login">
+        <div class="topbar" style="border:none;padding:0;margin-bottom:18px">
+          <div class="brand">
+            <div class="mark"></div>
+            <div><h1>${esc(t('appName'))}</h1><small>${esc(t('tagline'))}</small></div>
+          </div>${langBtn}
+        </div>
+        <div class="card"><div class="body">
+          <p class="eyebrow" style="margin:0 0 10px">${esc(t('chooseName'))} · ${list.length}</p>
+          <div class="names">
+            ${list.length ? list.map((x) => `
+              <button class="name-btn" data-pick="${x.id}">
+                <span>${esc(x.name)}</span>
+                ${x.isAdmin ? `<span class="pill gold">${esc(t('admin'))}</span>` : ''}
+              </button>`).join('') : `<p class="empty">${esc(t('noOne'))}</p>`}
+          </div>
+        </div></div>
+        <p class="hint" style="margin-top:12px;text-align:center">${esc(t('localOnly'))}</p>
+      </div>`;
+  }
+
+  const first = p.mustSetPin || !p.pinHash;
+  return `
+    <div class="login">
+      <div class="topbar" style="border:none;padding:0;margin-bottom:18px">
+        <div class="brand">
+          <div class="mark"></div>
+          <div><h1>${esc(p.name)}</h1><small>${esc(first ? t('setPin') : t('enterPin'))}</small></div>
+        </div>${langBtn}
+      </div>
+      <div class="card"><div class="body">
+        ${first ? `<p class="hint" style="margin-bottom:12px">${esc(p.pinHash ? t('afterReset') : t('firstTime'))}</p>` : ''}
+        <form id="pinform" style="display:grid;gap:10px">
+          <div class="pinrow">
+            <input id="pin1" type="password" inputmode="numeric" autocomplete="off"
+                   maxlength="${PIN_LEN}" placeholder="••••" aria-label="${esc(t('enterPin'))}" />
+          </div>
+          ${first ? `<div class="pinrow">
+            <input id="pin2" type="password" inputmode="numeric" autocomplete="off"
+                   maxlength="${PIN_LEN}" placeholder="••••" aria-label="${esc(t('confirmPin'))}" />
+          </div>` : ''}
+          <p class="err">${esc(ui.error)}</p>
+          <div style="display:flex;gap:8px">
+            <button type="submit" class="primary" style="flex:1">${esc(t('signIn'))}</button>
+            <button type="button" class="ghost" data-back>${esc(t('back'))}</button>
+          </div>
+        </form>
+      </div></div>
+    </div>`;
+}
+
+/* ------------------------------------------------------- dashboard */
+/* Everything lives on one page. These are jump links, not tabs — nothing is
+   hidden behind a click, so a section can never go missing again. */
+const SECTIONS = [
+  ['sec-today', 'tabToday'], ['sec-streak', 'streakBox'], ['sec-progress', 'tabProgress'],
+  ['sec-insight', 'tabInsight'], ['sec-report', 'tabReport'], ['sec-log', 'log'], ['sec-admin', 'tabAdmin']
+];
+
+function viewDashboard() {
+  const p = me();
+  const dk = viewedDay();
+  const now = Date.now();
+  const s = dayStats(p.id, dk, now);
+  const dstate = s.d ? s.d.state : 'not_started';
+
+  const statePill = !isToday()
+    ? `<span class="pill mute">${esc(dk)}</span>`
+    : dstate === 'active'
+      ? `<span class="pill good"><i class="dot live"></i>${esc(t('dayRunning'))}</span>`
+      : dstate === 'ended'
+        ? `<span class="pill mute">${esc(s.d.endReason === 'auto_all_complete' ? t('allDone') : t('dayDone'))}</span>`
+        : `<span class="pill warn">${esc(t('notStarted'))}</span>`;
+
+  const jump = SECTIONS.filter(([id]) => id !== 'sec-admin' || p.isAdmin)
+    .map(([id, key]) => `<button class="sm" data-jump="${id}">${esc(t(key))}</button>`).join('');
+
+  return `
+    ${storageOk ? '' : `<p class="banner">${esc(t('storageOff'))}</p>`}
+    <div class="topbar">
+      <div class="brand">
+        <div class="mark"></div>
+        <div>
+          <h1>${esc(t('appName'))}</h1>
+          <small>${esc(p.name)}${p.isAdmin ? ' · ' + esc(t('admin')) : ''} · <span class="num">${esc(todayKey())}</span></small>
+        </div>
+      </div>
+      ${statePill}
+      <button class="ghost sm" data-lang>${esc(t('lang'))}</button>
+      <button class="ghost sm" data-signout>${esc(t('signOut'))}</button>
+    </div>
+    <div class="jump">${jump}</div>
+    <div class="stack">
+      <div id="sec-today"    class="section">${viewToday(p, s, dstate, now, dk)}</div>
+      <div id="sec-streak"   class="section">${cardStreak(p, now)}</div>
+      <div id="sec-progress" class="section">${viewProgress(p, now)}</div>
+      <div id="sec-insight"  class="section">${viewInsight(p, now)}</div>
+      <div id="sec-report"   class="section">${viewReport(p, now)}</div>
+      <div id="sec-log"      class="section">${cardLog(p)}</div>
+      ${p.isAdmin ? `<div id="sec-admin" class="section">${viewAdmin()}</div>` : ''}
+    </div>
+    ${ui.finishing ? modalFinish() : ''}
+    ${ui.celebrate ? modalCelebrate() : ''}`;
+}
+
+/* ---------------------------------------------------------- streak box */
+function cardStreak(p, now) {
+  const dk = todayKey();
+  const m = successMap(p.id);
+  const streak = dailyStreak(m, dk);
+  const wk = weekDone(m, dk);
+  const mo = monthWeeks(m, dk);
+  const todayPass = !!m[dk];
+  const weekHit = wk >= WEEK_REQUIRED_DAYS;
+  const monthHit = mo >= MONTH_REQUIRED_WEEKS;
+  const days = weekDaysOf(dk);
+
+  const box = (hit, value, cap, goal) => `
+    <div class="sbox ${hit ? 'hit' : ''}">
+      <span class="cap">${esc(cap)}</span>
+      <span class="big">${value}</span>
+      <span class="pill ${hit ? 'good' : 'mute'}">${esc(hit ? t('achieved') : t('notYet'))}</span>
+      <span class="goal">${esc(goal)}</span>
+    </div>`;
+
+  /* Everyone, self included — seeing your own place next to the leaders is
+     the part that motivates. Ranked by streak, then by the week. */
+  const ranked = state.participants.filter((x) => x.active).map((x) => {
+    const mm = successMap(x.id);
+    return { x, d: dailyStreak(mm, dk), w: weekDone(mm, dk), mo: monthWeeks(mm, dk) };
+  }).sort((a, b) => b.d - a.d || b.w - a.w || b.mo - a.mo || a.x.name.localeCompare(b.x.name));
+
+  return `
+    <div class="card">
+      <header><h2>${esc(t('streakBox'))}</h2><span class="eyebrow">${esc(p.name)}</span></header>
+      <div class="body">
+        <div class="streakbox">
+          ${box(todayPass, streak + '<span style="font-size:.5em;color:var(--ink-3)"> ' + esc(t('dayU')) + '</span>', t('streakD'), t('dailyGoal'))}
+          ${box(weekHit, wk + '<span style="font-size:.5em;color:var(--ink-3)"> / ' + WEEK_REQUIRED_DAYS + '</span>', t('streakW'), t('weeklyGoal'))}
+          ${box(monthHit, mo + '<span style="font-size:.5em;color:var(--ink-3)"> / ' + MONTH_REQUIRED_WEEKS + '</span>', t('streakM'), t('monthlyGoal'))}
+        </div>
+
+        <p class="eyebrow" style="margin:16px 0 8px">${esc(t('thisWeek'))} · ${esc(weekRange(weekStartOf(dk)))}</p>
+        <div class="weekstrip">
+          ${days.map((d) => {
+            const future = d > dk;
+            const st = dayStats(p.id, d, now);
+            return `<div class="wday ${m[d] ? 'pass' : ''} ${d === dk ? 'today' : ''} ${future ? 'future' : ''}">
+              <small>${esc(DAY_NAMES[L][weekdayOf(d)])}</small>
+              <b>${future ? '·' : pct(st.done, st.total).toFixed(0) + '%'}</b>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <p class="eyebrow" style="margin:18px 0 8px">${esc(t('podium'))} · ${esc(t('groupStreaks'))}</p>
+        <div class="board">
+          ${ranked.map((o, i) => {
+            const earned = o.d > 0 || o.w > 0;
+            const rank = earned && i < 3 ? ` rank${i + 1}` : '';
+            return `<div class="row ${o.x.id === p.id ? 'me' : ''}${rank}">
+              <div class="rk">${rank ? `<span class="medal">${i + 1}</span>` : i + 1}</div>
+              <div class="nm"><span>${esc(o.x.name)}</span>
+                ${o.x.id === p.id ? `<em>${esc(t('you'))}</em>` : ''}
+                ${o.mo >= MONTH_REQUIRED_WEEKS ? `<span class="pill gold">${esc(t('streakM'))}</span>`
+                  : o.w >= WEEK_REQUIRED_DAYS ? `<span class="pill good">${esc(t('streakW'))}</span>` : ''}</div>
+              <div class="pc"><b>${o.w} / ${WEEK_REQUIRED_DAYS}</b><span>${o.d} ${esc(t('dayU'))}</span></div>
+            </div>`;
+          }).join('') || `<p class="empty">${esc(t('noOne'))}</p>`}
+        </div>
+        <p class="hint" style="margin-top:12px">${esc(t('weekRule'))} · ${esc(t('monthRule'))}</p>
+      </div>
+    </div>`;
+}
+
+function modalCelebrate() {
+  const c = ui.celebrate;
+  return `
+    <div class="celebrate" data-celebveil>
+      <div class="box" role="dialog" aria-modal="true">
+        <div class="lamp" aria-hidden="true"></div>
+        <h3>${esc(c.title)}</h3>
+        <p>${esc(c.body)}</p>
+        <button class="primary" data-celebclose>${esc(t('nice'))}</button>
+      </div>
+    </div>`;
+}
+
+/* Fires once per milestone per period. Checked after any action that could
+   push a participant over one of the three lines. */
+function checkCelebration(pid) {
+  const p = personById(pid);
+  if (!p) return;
+  const dk = todayKey();
+  const m = successMap(pid);
+  state.celebrated = state.celebrated || {};
+  const seen = state.celebrated[pid] || (state.celebrated[pid] = {});
+
+  const monthKey = monthKeyOf(dk);
+  const weekKey = weekStartOf(dk);
+
+  if (monthWeeks(m, dk) >= MONTH_REQUIRED_WEEKS && seen.monthly !== monthKey) {
+    seen.monthly = monthKey;
+    ui.celebrate = { title: t('streakM'), body: t('celebrateM', { name: p.name }) };
+  } else if (weekDone(m, dk) >= WEEK_REQUIRED_DAYS && seen.weekly !== weekKey) {
+    seen.weekly = weekKey;
+    ui.celebrate = { title: t('streakW'), body: t('celebrateW', { name: p.name }) };
+  } else if (m[dk] && seen.daily !== dk) {
+    seen.daily = dk;
+    ui.celebrate = { title: t('streakD'), body: t('celebrateD', { name: p.name, n: ar(dailyStreak(m, dk), 'day') }) };
+  }
+  save();
+}
+
+/* ---------------------------------------------------------- day nav */
+function dayNav() {
+  const dk = viewedDay();
+  const weekday = DAY_NAMES[L][weekdayOf(dk)];
+  return `
+    <div class="daynav">
+      <button class="sm" data-day="-1">‹ ${esc(t('prevDay'))}</button>
+      <span class="when">${esc(dk)} · ${esc(weekday)}</span>
+      <button class="sm" data-day="1" ${ui.dayOffset >= 0 ? 'disabled' : ''}>${esc(t('nextDay'))} ›</button>
+      ${ui.dayOffset !== 0 ? `<button class="sm primary" data-day="0">${esc(t('backToToday'))}</button>` : ''}
+    </div>`;
+}
+
+/* ---------------------------------------------------------- TODAY */
+function viewToday(p, s, dstate, now, dk) {
+  const percent = pct(s.done, s.total);
+  const need = needed(s.done, s.total);
+  const m = successMap(p.id);
+  const streak = dailyStreak(m, dk);
+  const wk = weekDone(m, dk);
+  const mo = monthWeeks(m, dk);
+
+  return `
+    ${dayNav()}
+    ${isToday() ? '' : `<p class="note" style="margin-bottom:14px">${esc(t('viewingPast'))}</p>`}
+    ${isToday() ? '' : pastDaySummary(dk, now)}
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="summary">
+        <div class="lantern ${s.pass ? 'lit' : ''}" style="--p:${Math.min(100, percent)}"
+             role="img" aria-label="${esc(t('done'))} ${percent}%">
+          <div class="val">
+            <b>${percent.toFixed(percent % 1 ? 2 : 0)}<span style="font-size:.62em">%</span></b>
+            <span>${s.done} / ${s.total}</span>
+          </div>
+        </div>
+        <div>
+          <div class="stats">
+            <div class="stat gold"><b data-clock="day">${fmtDur(s.ms)}</b><span>${esc(t('workTime'))}</span></div>
+            <div class="stat ${s.pass ? 'good' : ''}"><b>${s.pass ? '✓' : need}</b><span>${esc(s.pass ? t('targetMet') : t('target'))}</span></div>
+            <div class="stat"><b>${streak}</b><span>${esc(t('streakD'))}</span></div>
+            <div class="stat"><b>${wk}<span style="font-size:.6em;color:var(--ink-3)"> / ${WEEK_REQUIRED_DAYS}</span></b><span>${esc(t('streakW'))}</span></div>
+            <div class="stat"><b>${mo}<span style="font-size:.6em;color:var(--ink-3)"> / ${MONTH_REQUIRED_WEEKS}</span></b><span>${esc(t('streakM'))}</span></div>
+          </div>
+          <p class="hint" style="margin-top:12px">${esc(t('timeNote'))} ${esc(t('sumNote'))}</p>
+          ${isToday() ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+            ${dstate === 'not_started'
+              ? `<button class="primary" data-startday>${esc(t('startDay'))}</button>`
+              : dstate === 'active'
+                ? `<button data-endday>${esc(t('endDay'))}</button>
+                   ${s.done < s.total ? `<button class="sm" data-finishall>${esc(t('finishAll'))}</button>` : ''}`
+                : `<button data-startday>${esc(t('resumeDay'))}</button>`}
+          </div>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="stack">${cardTasks(p, s, dstate, now, dk)}${cardCompletion(s)}</div>
+      <div class="stack">${cardBoard(p, now, dk)}${cardFeed(p)}</div>
+    </div>`;
+}
+
+function pastDaySummary(dk, now) {
+  const rows = leaderboard(now, dk);
+  const finished = rows.filter((r) => r.pass);
+  const worked = rows.filter((r) => !r.pass && (r.ms > 0 || r.done > 0));
+  const absent = rows.filter((r) => r.ms === 0 && r.done === 0);
+  const nameList = (list) => list.length ? list.map((r) => esc(r.p.name)).join('، ') : esc(t('nobody'));
+
+  return `
+    <div class="card" style="margin-bottom:16px">
+      <header><h2>${esc(t('daySummary'))}</h2><span class="eyebrow">${esc(dk)}</span></header>
+      <div class="body grid2">
+        <div>
+          <p class="eyebrow" style="margin:0 0 4px">${esc(t('whoFinished'))} · ${finished.length}</p>
+          <p class="hint">${nameList(finished)}</p>
+        </div>
+        <div>
+          <p class="eyebrow" style="margin:0 0 4px">${esc(t('whoWorked'))} · ${worked.length}</p>
+          <p class="hint">${nameList(worked)}</p>
+        </div>
+        <div>
+          <p class="eyebrow" style="margin:0 0 4px">${esc(t('whoAbsent'))} · ${absent.length}</p>
+          <p class="hint">${nameList(absent)}</p>
+        </div>
+      </div>
+    </div>`;
+}
+
+function cardTasks(p, s, dstate, now, dk) {
+  const list = !s.d
+    ? activeTasks().map((x) => ({ task: x, td: null }))
+    : Object.keys(s.d.tasks).map((id) => ({ task: taskById(Number(id)), td: s.d.tasks[id] }))
+        .filter((x) => x.task).sort((a, b) => a.task.pos - b.task.pos);
+
+  return `
+    <div class="card">
+      <header><h2>${esc(t('myTasks'))}</h2><span class="eyebrow">${list.length}</span></header>
+      <div class="body">
+        ${isToday() && dstate === 'not_started' ? `<p class="hint" style="margin-bottom:12px">${esc(t('startHint'))}</p>` : ''}
+        ${isToday() && dstate === 'active' ? `<p class="hint" style="margin-bottom:12px">${esc(t('parallelNote'))}</p>` : ''}
+        <div class="tasks">
+          ${list.map(({ task, td }) => taskRow(task, td, s.d, dstate, now)).join('') || `<p class="empty">${esc(t('noHistory'))}</p>`}
+        </div>
+      </div>
+    </div>`;
+}
+
+function taskRow(task, td, d, dstate, now) {
+  const status = td ? td.status : 'idle';
+  const ms = taskMs(d, task.id, now);
+  const running = status === 'running';
+  const locked = dstate !== 'active' || !isToday();
+
+  const label = { idle: 'sIdle', running: 'sRunning', paused: 'sPaused', completed: 'sCompleted', attempted: 'sAttempted' }[status];
+  const cls = { completed: 'good', running: 'gold', attempted: 'warn', paused: 'mute', idle: 'mute' }[status];
+
+  let actions = '';
+  if (locked) {
+    actions = '';
+  } else if (status === 'completed' || status === 'attempted') {
+    actions = `<button class="sm" data-reopen="${task.id}">${esc(t('reopen'))}</button>`;
+  } else if (running) {
+    actions = `<button class="sm" data-pause="${task.id}">${esc(t('pause'))}</button>
+               <button class="sm primary" data-finish="${task.id}">${esc(t('finish'))}</button>`;
+  } else {
+    actions = `<button class="sm primary" data-start="${task.id}">${esc(status === 'paused' ? t('resume') : t('start'))}</button>
+               ${status === 'paused' ? `<button class="sm" data-finish="${task.id}">${esc(t('finish'))}</button>` : ''}`;
+  }
+
+  const meta = [];
+  if (!task.counts) meta.push(`<span class="pill mute">${esc(t('noCount'))}</span>`);
+  if (td && td.pauses) meta.push(`${td.pauses} ${esc(t('pauses'))}`);
+  if (td && td.reopens) meta.push(`${td.reopens} ${esc(t('reopens'))}`);
+  if (td && td.completedAt) meta.push(`<span class="num">${esc(fmtClock(td.completedAt))}</span>`);
+
+  const open = d ? openIntervalFor(d, task.id) : null;
+  const note = td && td.note ? td.note : '';
+
+  return `
+    <div class="task ${running ? 'running' : ''} ${status === 'completed' ? 'completed' : ''}">
+      <div style="min-width:0">
+        <div class="tname">
+          <span>${esc(task.name)}</span>
+          <span class="pill ${cls}">${running ? '<i class="dot live"></i>' : ''}${esc(t(label))}</span>
+        </div>
+        ${meta.length ? `<div class="tmeta">${meta.join('<span aria-hidden="true">·</span>')}</div>` : ''}
+      </div>
+      <div class="tactions">
+        <span class="tclock ${running ? 'on' : ''}" data-clock="task"
+              data-base="${ms}" data-since="${running && open ? open.start : ''}">${fmtDur(ms)}</span>
+        ${actions}
+      </div>
+      ${td ? (locked
+        ? (note ? `<p class="tnoteread">${esc(note)}</p>` : '')
+        : `<input class="tnote" type="text" id="note-${task.id}" data-note="${task.id}"
+                 value="${esc(note)}" placeholder="${esc(t('notePlaceholder'))}"
+                 aria-label="${esc(t('noteLabel'))} — ${esc(task.name)}" />`) : ''}
+    </div>`;
+}
+
+/* Names the completed and the remaining tasks explicitly. */
+function cardCompletion(s) {
+  if (!s.d) return '';
+  const entries = Object.entries(s.d.tasks).map(([id, v]) => ({ task: taskById(Number(id)), v })).filter((x) => x.task);
+  const done = entries.filter((x) => x.v.status === 'completed');
+  const left = entries.filter((x) => x.v.status !== 'completed');
+  const allDone = left.length === 0 && done.length > 0;
+
+  return `
+    <div class="card">
+      <header><h2>${esc(t('done'))}</h2><span class="eyebrow">${done.length} / ${entries.length}</span></header>
+      <div class="body">
+        ${allDone ? `<p class="note gold" style="margin-bottom:12px">${esc(t('allTasksDone', { n: done.length }))}</p>` : ''}
+        <div class="grid2">
+          <div>
+            <p class="eyebrow" style="margin:0 0 6px">${esc(t('doneList'))} · ${done.length}</p>
+            ${done.length ? `<ul style="margin:0;padding-inline-start:18px">${done.map((x) =>
+              `<li style="color:var(--good);font-size:.88rem">${esc(x.task.name)}</li>`).join('')}</ul>`
+              : `<p class="hint">${esc(t('nobody'))}</p>`}
+          </div>
+          <div>
+            <p class="eyebrow" style="margin:0 0 6px">${esc(t('leftList'))} · ${left.length}</p>
+            ${left.length ? `<ul style="margin:0;padding-inline-start:18px">${left.map((x) =>
+              `<li style="color:var(--ink-2);font-size:.88rem">${esc(x.task.name)}
+                 ${x.v.status === 'attempted' ? `<span class="pill warn">${esc(t('sAttempted'))}</span>` : ''}</li>`).join('')}</ul>`
+              : `<p class="hint">—</p>`}
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function cardBoard(p, now, dk) {
+  const rows = leaderboard(now, dk);
+  return `
+    <div class="card">
+      <header><h2>${esc(t('everyone'))}</h2><span class="eyebrow">${esc(dk)}</span></header>
+      <div class="body">
+        <div class="board">
+          ${rows.length ? rows.map((r, i) => {
+            /* Only someone who actually did something can take a podium place —
+               otherwise a table of zeros would crown whoever sorts first. */
+            const earned = r.done > 0 || r.ms > 0;
+            const rank = earned && i < 3 ? ` rank${i + 1}` : '';
+            return `<div class="row ${r.p.id === p.id ? 'me' : ''}${rank}">
+              <div class="rk">${rank ? `<span class="medal">${i + 1}</span>` : i + 1}</div>
+              <div class="nm">
+                <span style="overflow:hidden;text-overflow:ellipsis">${esc(r.p.name)}</span>
+                ${r.p.id === p.id ? `<em>${esc(t('you'))}</em>` : ''}
+                ${r.streak > 1 ? `<span class="pill gold">${r.streak} ${esc(t('dayU'))}</span>` : ''}
+              </div>
+              <div class="pc"><b>${r.percent.toFixed(0)}%</b><span>${fmtDur(r.ms)}</span></div>
+              <div class="bar"><i class="${r.pass ? 'done' : ''}" style="width:${Math.min(100, r.percent)}%"></i></div>
+            </div>`;
+          }).join('') : `<p class="empty">${esc(t('noOne'))}</p>`}
+        </div>
+      </div>
+    </div>`;
+}
+
+const EVENT_LABEL = {
+  ar: {
+    day_started: 'بدأ يومه', day_ended: 'أنهى يومه', task_started: 'بدأ',
+    task_paused: 'أوقف', task_auto_paused: 'تحوّل عن', task_resumed: 'استأنف',
+    task_completed: 'أنجز', task_attempted: 'أنهى دون إنجاز', task_reopened: 'أعاد فتح',
+    pin_set: 'ضبط رمزه', pin_reset: 'صُفّر رمزه', participant_added: 'أُضيف مشارك',
+    participant_removed: 'أُزيل مشارك', task_added: 'أُضيفت مهمة', task_renamed: 'أُعيدت التسمية',
+    task_archived: 'أُرشفت مهمة'
+  },
+  en: {
+    day_started: 'started their day', day_ended: 'ended their day', task_started: 'started',
+    task_paused: 'paused', task_auto_paused: 'switched away from', task_resumed: 'resumed',
+    task_completed: 'completed', task_attempted: 'finished without completing', task_reopened: 'reopened',
+    pin_set: 'set their PIN', pin_reset: 'PIN reset', participant_added: 'participant added',
+    participant_removed: 'participant removed', task_added: 'task added', task_renamed: 'task renamed',
+    task_archived: 'task archived'
+  }
+};
+/* Events worth telling everyone about — the ones that create momentum. */
+const FEED_EVENTS = ['day_started', 'task_completed', 'day_ended', 'task_attempted'];
+
+function cardFeed(p) {
+  const dk = todayKey();
+  const rows = state.log.filter((e) => e.dk === dk && FEED_EVENTS.includes(e.event)).slice(-25).reverse();
+  return `
+    <div class="card">
+      <header>
+        <h2>${esc(t('liveFeed'))}</h2>
+        <span class="pill good"><i class="dot live"></i>${rows.length}</span>
+      </header>
+      <div class="body">
+        <div class="feed">
+          ${rows.length ? rows.map((e) => {
+            const who = personById(e.pid);
+            const task = e.taskId ? taskById(e.taskId) : null;
+            const fresh = Date.now() - e.at < 120000;
+            return `<div class="fitem ${fresh ? 'fresh' : ''}">
+              <span class="who">${esc(who ? who.name : '—')}</span>
+              <span>${esc((EVENT_LABEL[L] || EVENT_LABEL.ar)[e.event] || e.event)}
+                ${task ? '<strong>' + esc(task.name) + '</strong>' : ''}</span>
+              <time>${esc(fmtClock(e.at))}</time>
+            </div>`;
+          }).join('') : `<p class="empty">${esc(t('feedEmpty'))}</p>`}
+        </div>
+        <p class="hint" style="margin-top:10px">${esc(t('sameDevice'))}</p>
+      </div>
+    </div>`;
+}
+
+/* ---------------------------------------------------------- PROGRESS */
+function viewProgress(p, now) {
+  const recent = Object.keys(state.days[p.id] || {}).sort().reverse().slice(0, 14);
+  const maxMs = Math.max(1, ...recent.map((d) => dayStats(p.id, d, now).ms));
+
+  return `
+    <div class="card">
+      <header><h2>${esc(t('dailyProgress'))}</h2><span class="eyebrow">${esc(t('last14'))}</span></header>
+      <div class="body">
+        ${recent.length ? `<div class="board">${recent.map((d) => {
+          const st = dayStats(p.id, d, now);
+          const percent = pct(st.done, st.total);
+          return `<div class="row">
+            <div class="rk">${esc(DAY_NAMES[L][weekdayOf(d)].slice(0, 3))}</div>
+            <div class="nm"><span class="num" style="font-weight:600">${esc(d)}</span>
+              ${st.pass ? `<span class="pill good">${esc(t('pass'))}</span>` : `<span class="pill mute">${st.done}/${st.total}</span>`}</div>
+            <div class="pc"><b>${percent.toFixed(0)}%</b><span>${fmtDur(st.ms)}</span></div>
+            <div class="bar tall"><i class="${st.pass ? 'done' : ''}" style="width:${Math.max(2, st.ms / maxMs * 100)}%"></i></div>
+          </div>`;
+        }).join('')}</div>` : `<p class="empty">${esc(t('noHistory'))}</p>`}
+      </div>
+    </div>`;
+}
+
+function cardLog(p) {
+  return `
+    <div class="card">
+      <header><h2>${esc(t('log'))}</h2><span class="eyebrow">${state.log.length}</span></header>
+      <div class="body scroll vscroll">${logTable(p, p.isAdmin)}</div>
+    </div>`;
+}
+
+function logTable(p, all) {
+  const rows = state.log.filter((e) => all || e.pid === p.id).slice(-120).reverse();
+  if (!rows.length) return `<p class="empty">${esc(t('noHistory'))}</p>`;
+  return `<table><tbody>
+    ${rows.map((e) => {
+      const who = personById(e.pid);
+      const task = e.taskId ? taskById(e.taskId) : null;
+      return `<tr>
+        <td class="n" style="color:var(--ink-3)">${esc(e.dk)}</td>
+        <td class="n" style="color:var(--ink-3)">${esc(fmtClock(e.at))}</td>
+        ${all ? `<td>${esc(who ? who.name : '—')}</td>` : ''}
+        <td>${esc((EVENT_LABEL[L] || EVENT_LABEL.ar)[e.event] || e.event)}</td>
+        <td style="white-space:normal;color:var(--ink-2)">${esc(task ? task.name : '')}</td>
+      </tr>`;
+    }).join('')}
+  </tbody></table>`;
+}
+
+/* ---------------------------------------------------------- REPORT */
+function monthStats(pid, monthAnchor, now) {
+  const weeks = monthWeekList(monthAnchor);
+  const m = successMap(pid);
+  const days = Object.keys(state.days[pid] || {}).filter((d) => monthKeyOf(d) === monthKeyOf(monthAnchor));
+  let ms = 0, done = 0, total = 0, attempted = 0, pauses = 0, reopens = 0;
+  for (const d of days) {
+    const s = dayStats(pid, d, now);
+    ms += s.ms; done += s.done; total += s.total; attempted += s.attempted;
+    for (const v of Object.values(s.d ? s.d.tasks : {})) { pauses += v.pauses; reopens += v.reopens; }
+  }
+  const weekRows = weeks.map((w) => ({ w, n: weekDone(m, w), ok: weekDone(m, w) >= WEEK_REQUIRED_DAYS }));
+  return {
+    weeks: weekRows, goodWeeks: weekRows.filter((x) => x.ok).length,
+    successDays: days.filter((d) => m[d]).length, activeDays: days.length,
+    ms, done, total, attempted, pauses, reopens,
+    rate: pct(done, total)
+  };
+}
+
+function viewReport(p, now) {
+  const anchor = viewedDay();
+  const mk = monthKeyOf(anchor);
+  const people = state.participants.filter((x) => x.active);
+  const stats = people.map((x) => ({ p: x, s: monthStats(x.id, anchor, now) }))
+    .sort((a, b) => b.s.goodWeeks - a.s.goodWeeks || b.s.successDays - a.s.successDays || b.s.rate - a.s.rate);
+  const maxMs = Math.max(1, ...stats.map((x) => x.s.ms));
+
+  const top = stats[0];
+  const groupDays = stats.reduce((n, x) => n + x.s.successDays, 0);
+  const groupMs = stats.reduce((n, x) => n + x.s.ms, 0);
+  const achieved = stats.filter((x) => x.s.goodWeeks >= MONTH_REQUIRED_WEEKS);
+
+  return `
+    <div class="stack">
+      <div class="card">
+        <header>
+          <h2>${esc(t('monthReportFor', { m: mk }))}</h2>
+          <div style="display:flex;gap:6px">
+            <button class="sm" data-exportcsv>${esc(t('exportCsv'))}</button>
+            <button class="sm" data-exportpdf>${esc(t('exportPdf'))}</button>
+          </div>
+        </header>
+        <div class="body">
+          <p class="eyebrow" style="margin:0 0 8px">${esc(t('written'))}</p>
+          <div class="prose">
+            <p class="lede">${esc(L === 'ar'
+              ? `في شهر ${mk} سجّلت المجموعة ${ar(groupDays, 'dayDone')} بإجمالي ${fmtMins(groupMs)} من العمل الفعلي، و`
+                + (achieved.length === 0
+                    ? `لم يحقق أحد شرط الشهر بعد من أصل ${ar(people.length, 'person')}.`
+                    : `حقّق ${achieved.length} من ${ar(people.length, 'person')} شرط الشهر.`)
+              : `In ${mk} the group recorded ${en(groupDays, 'successful day')} totalling ${fmtMins(groupMs)} of actual work, and `
+                + (achieved.length === 0
+                    ? `none of the ${people.length} participants has met the month's requirement yet.`
+                    : `${achieved.length} of ${people.length} participants met the month's requirement.`))}</p>
+            <ul>
+              ${stats.map((x) => `<li>${esc(reportLine(x.p, x.s))}</li>`).join('')}
+            </ul>
+            <p class="hint">${esc(L === 'ar'
+              ? `شرط الشهر: ${MONTH_REQUIRED_WEEKS} أسابيع ناجحة، والأسبوع الناجح ${WEEK_REQUIRED_DAYS} أيام يبلغ فيها المشارك ٩٠٪ فأكثر.`
+              : `Month rule: ${MONTH_REQUIRED_WEEKS} successful weeks; a week succeeds on ${WEEK_REQUIRED_DAYS} days at 90% or more.`)}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <header><h2>${esc(t('visual'))}</h2><span class="eyebrow">${esc(mk)}</span></header>
+        <div class="body">
+          <div class="board">
+            ${stats.map((x, i) => `
+              <div class="row ${x.p.id === p.id ? 'me' : ''}">
+                <div class="rk">${i + 1}</div>
+                <div class="nm">
+                  <span>${esc(x.p.name)}</span>
+                  <span class="pill ${x.s.goodWeeks >= MONTH_REQUIRED_WEEKS ? 'good' : 'mute'}">
+                    ${x.s.goodWeeks} / ${MONTH_REQUIRED_WEEKS}</span>
+                </div>
+                <div class="pc"><b>${x.s.rate.toFixed(0)}%</b><span>${fmtDur(x.s.ms)}</span></div>
+                <div class="bar tall"><i class="${x.s.goodWeeks >= MONTH_REQUIRED_WEEKS ? 'done' : ''}"
+                     style="width:${Math.max(2, x.s.ms / maxMs * 100)}%"></i></div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <header><h2>${esc(t('weeks'))}</h2></header>
+        <div class="body scroll">
+          <table>
+            <thead><tr>
+              <th>${esc(t('participant'))}</th>
+              ${(stats[0] ? stats[0].s.weeks : []).map((w) => `<th>${esc(weekRange(w.w))}</th>`).join('')}
+              <th>${esc(t('successDays'))}</th><th>${esc(t('activeTotal'))}</th><th>${esc(t('result'))}</th>
+            </tr></thead>
+            <tbody>
+              ${stats.map((x) => `<tr>
+                <td>${esc(x.p.name)}</td>
+                ${x.s.weeks.map((w) => `<td class="n" style="color:${w.ok ? 'var(--good)' : 'var(--ink-3)'}">${w.n}</td>`).join('')}
+                <td class="n">${x.s.successDays}</td>
+                <td class="n">${fmtDur(x.s.ms)}</td>
+                <td><span class="pill ${x.s.goodWeeks >= MONTH_REQUIRED_WEEKS ? 'good' : 'bad'}">
+                  ${esc(x.s.goodWeeks >= MONTH_REQUIRED_WEEKS ? t('monthPass') : t('monthFail'))}</span></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function reportLine(person, s) {
+  if (L === 'ar') {
+    if (!s.activeDays) return `${person.name}: لم يسجّل أي يوم هذا الشهر.`;
+    let line = `${person.name}: ${ar(s.successDays, 'dayDone')} من ${ar(s.activeDays, 'dayLogged')}، ` +
+      `بنسبة إنجاز ${s.rate.toFixed(0)}٪ ووقت فعلي ${fmtMins(s.ms)}، و${ar(s.goodWeeks, 'week')}.`;
+    if (s.attempted) line += ` أنهى ${ar(s.attempted, 'task')} دون إنجاز.`;
+    if (s.pauses > s.activeDays * 3) line += ` الإيقاف المؤقت متكرر عنده (${ar(s.pauses, 'time')}).`;
+    if (s.reopens) line += ` أعاد فتح ${ar(s.reopens, 'task')}.`;
+    return line;
+  }
+  if (!s.activeDays) return `${person.name}: recorded no days this month.`;
+  let line = `${person.name}: ${s.successDays} successful of ${en(s.activeDays, 'recorded day')}, ` +
+    `${s.rate.toFixed(0)}% completion, ${fmtMins(s.ms)} of actual work, ${en(s.goodWeeks, 'successful week')}.`;
+  if (s.attempted) line += ` Finished ${en(s.attempted, 'task')} without completing.`;
+  if (s.pauses > s.activeDays * 3) line += ` Pauses frequently (${en(s.pauses, 'time')}).`;
+  if (s.reopens) line += ` Reopened ${en(s.reopens, 'task')}.`;
+  return line;
+}
+
+/* ---------------------------------------------------------- INSIGHT */
+/* Every figure below is read from recorded data. Nothing is estimated. */
+function analyse(pid, now) {
+  const dk = todayKey();
+  const days = Object.keys(state.days[pid] || {}).sort();
+  if (!days.length) return null;
+
+  const m = successMap(pid);
+  const today = dayStats(pid, dk, now);
+  const strengths = [], weaknesses = [], advice = [];
+
+  /* Per-task aggregates across all recorded days. */
+  const perTask = {};
+  let totalMs = 0, totalDone = 0, totalPauses = 0, totalReopens = 0, totalAttempted = 0;
+  for (const d of days) {
+    const s = dayStats(pid, d, now);
+    totalMs += s.ms;
+    for (const [tid, v] of Object.entries(s.d.tasks)) {
+      const key = Number(tid);
+      perTask[key] = perTask[key] || { ms: 0, done: 0, attempted: 0, pauses: 0, reopens: 0, seen: 0 };
+      const rec = perTask[key];
+      rec.ms += taskMs(s.d, key, now);
+      rec.seen++;
+      if (v.status === 'completed') { rec.done++; totalDone++; }
+      if (v.status === 'attempted') { rec.attempted++; totalAttempted++; }
+      rec.pauses += v.pauses; totalPauses += v.pauses;
+      rec.reopens += v.reopens; totalReopens += v.reopens;
+    }
+  }
+
+  const successDays = days.filter((d) => m[d]).length;
+  const streak = dailyStreak(m, dk);
+  const avgTaskMs = totalDone ? Math.round(totalMs / totalDone) : 0;
+
+  /* Comparison against the previous seven recorded days. */
+  const recent = days.slice(-7), prior = days.slice(-14, -7);
+  const rate = (list) => {
+    let done = 0, total = 0;
+    for (const d of list) { const s = dayStats(pid, d, now); done += s.done; total += s.total; }
+    return pct(done, total);
+  };
+  const recentRate = rate(recent), priorRate = prior.length ? rate(prior) : null;
+
+  /* Strengths */
+  if (streak >= 2) strengths.push(L === 'ar'
+    ? `سلسلتك الحالية ${ar(streak, 'day')} متتالية بلغت فيها ٩٠٪ فأكثر.`
+    : `Your current streak is ${en(streak, 'consecutive day')} at 90% or more.`);
+  if (successDays) strengths.push(L === 'ar'
+    ? `نجحت في ${ar(successDays, 'dayDone')} من ${ar(days.length, 'dayLogged')}.`
+    : `You succeeded on ${successDays} of ${en(days.length, 'recorded day')}.`);
+  if (priorRate != null && recentRate > priorRate) strengths.push(L === 'ar'
+    ? `نسبتك في آخر ٧ أيام ${recentRate.toFixed(0)}٪ مقابل ${priorRate.toFixed(0)}٪ في السبعة التي قبلها — تحسّن واضح.`
+    : `Your last 7 days averaged ${recentRate.toFixed(0)}% against ${priorRate.toFixed(0)}% before — a clear improvement.`);
+  if (avgTaskMs) strengths.push(L === 'ar'
+    ? `متوسط زمن المهمة المنجزة عندك ${fmtMins(avgTaskMs)}.`
+    : `Your average time per completed task is ${fmtMins(avgTaskMs)}.`);
+
+  /* Weaknesses, stated plainly — the spec asks for direct, evidence-based. */
+  if (priorRate != null && recentRate < priorRate) weaknesses.push(L === 'ar'
+    ? `نسبتك نزلت من ${priorRate.toFixed(0)}٪ إلى ${recentRate.toFixed(0)}٪ خلال الأسبوعين الأخيرين.`
+    : `Your rate dropped from ${priorRate.toFixed(0)}% to ${recentRate.toFixed(0)}% over the last two weeks.`);
+
+  const timeSinks = Object.entries(perTask)
+    .filter(([, r]) => r.attempted > 0 && r.ms > 0)
+    .sort((a, b) => b[1].ms - a[1].ms).slice(0, 2);
+  for (const [tid, r] of timeSinks) {
+    const task = taskById(Number(tid));
+    if (!task) continue;
+    weaknesses.push(L === 'ar'
+      ? `«${task.name}» أخذت ${fmtMins(r.ms)} وانتهت ${ar(r.attempted, 'time')} دون إنجاز — وقت استُهلك بلا نتيجة.`
+      : `"${task.name}" consumed ${fmtMins(r.ms)} and ended without completion ${en(r.attempted, 'time')} — time spent with no outcome.`);
+    advice.push(L === 'ar'
+      ? `ابدأ «${task.name}» بخطوة أولى صغيرة جداً، ولا تنتقل لغيرها قبل إتمامها.`
+      : `Start "${task.name}" with one very small first step, and do not switch away before finishing it.`);
+  }
+
+  const pausey = Object.entries(perTask).sort((a, b) => b[1].pauses - a[1].pauses)[0];
+  if (pausey && pausey[1].pauses >= 3) {
+    const task = taskById(Number(pausey[0]));
+    if (task) weaknesses.push(L === 'ar'
+      ? `«${task.name}» أوقفتها ${ar(pausey[1].pauses, 'time')} — التقطيع المتكرر يطيل المهمة.`
+      : `"${task.name}" was paused ${en(pausey[1].pauses, 'time')} — repeated interruption stretches a task out.`);
+  }
+
+  const reopened = Object.entries(perTask).sort((a, b) => b[1].reopens - a[1].reopens)[0];
+  if (reopened && reopened[1].reopens >= 2) {
+    const task = taskById(Number(reopened[0]));
+    if (task) weaknesses.push(L === 'ar'
+      ? `«${task.name}» أعدت فتحها ${ar(reopened[1].reopens, 'time')} — إمّا أنها أكبر من مهمة واحدة، أو أنك تغلقها قبل إتمامها فعلاً.`
+      : `"${task.name}" was reopened ${en(reopened[1].reopens, 'time')} — either it is bigger than one task, or you close it before it is truly done.`);
+  }
+
+  if (totalAttempted > totalDone && totalDone > 0) weaknesses.push(L === 'ar'
+    ? `أنهيت ${ar(totalAttempted, 'task')} دون إنجاز مقابل ${totalDone} منجزة — النية موجودة والإغلاق ناقص.`
+    : `You finished ${en(totalAttempted, 'task')} without completing against ${totalDone} completed — the intent is there, the closing is not.`);
+
+  /* Today, and what stands between you and the target. */
+  const need = needed(today.done, today.total);
+  let headline;
+  if (!today.d) headline = L === 'ar' ? 'لم تبدأ يومك بعد.' : 'You have not started your day yet.';
+  else if (today.pass) headline = L === 'ar'
+    ? `اليوم ${pct(today.done, today.total).toFixed(0)}٪ — بلغت الهدف وحافظت على سلسلتك.`
+    : `Today is ${pct(today.done, today.total).toFixed(0)}% — target reached and your streak is safe.`;
+  else headline = L === 'ar'
+    ? `اليوم ${today.done} من ${today.total} (${pct(today.done, today.total).toFixed(0)}٪). تحتاج ${ar(need, 'task')} للوصول إلى ٩٠٪.`
+    : `Today is ${today.done} of ${today.total} (${pct(today.done, today.total).toFixed(0)}%). You need ${en(need, 'more task')} to reach 90%.`;
+
+  if (!today.pass && streak >= 1) advice.push(L === 'ar'
+    ? `سلسلتك (${ar(streak, 'day')}) على المحك اليوم — ${ar(need, 'task')} تحميها.`
+    : `Your ${streak}-day streak is at risk today — ${en(need, 'task')} protects it.`);
+  if (totalPauses > totalDone * 2 && totalDone > 0) advice.push(L === 'ar'
+    ? 'جرّب فترة عمل متصلة قصيرة بلا إيقاف بدل الجلسات المتقطّعة.'
+    : 'Try one short unbroken block instead of scattered sessions.');
+  if (!advice.length) advice.push(L === 'ar'
+    ? 'استمر على نفس النمط — بياناتك لا تُظهر مشكلة تحتاج تغييراً.'
+    : 'Keep going as you are — your data shows no pattern that needs changing.');
+
+  return { headline, strengths, weaknesses, advice };
+}
+
+function viewInsight(p, now) {
+  const a = analyse(p.id, now);
+  const cards = [];
+
+  cards.push(`
+    <div class="card">
+      <header><h2>${esc(t('insight'))}</h2><span class="eyebrow">${esc(p.name)}</span></header>
+      <div class="body">
+        ${!a ? `<p class="empty">${esc(t('noData'))}</p>` : `
+          <p class="note gold" style="margin-bottom:14px">${esc(a.headline)}</p>
+          <div class="grid2">
+            <div>
+              <p class="eyebrow" style="margin:0 0 6px">${esc(t('strengths'))}</p>
+              ${a.strengths.length ? `<ul class="prose" style="padding-inline-start:18px">${a.strengths.map((x) =>
+                `<li style="font-size:.9rem">${esc(x)}</li>`).join('')}</ul>` : `<p class="hint">—</p>`}
+            </div>
+            <div>
+              <p class="eyebrow" style="margin:0 0 6px">${esc(t('weaknesses'))}</p>
+              ${a.weaknesses.length ? `<ul class="prose" style="padding-inline-start:18px">${a.weaknesses.map((x) =>
+                `<li style="font-size:.9rem">${esc(x)}</li>`).join('')}</ul>` : `<p class="hint">—</p>`}
+            </div>
+          </div>
+          <p class="eyebrow" style="margin:14px 0 6px">${esc(t('advice'))}</p>
+          <ul class="prose" style="padding-inline-start:18px">${a.advice.map((x) =>
+            `<li style="font-size:.9rem">${esc(x)}</li>`).join('')}</ul>
+          <p class="hint" style="margin-top:12px">${esc(t('analysisNote'))}</p>`}
+      </div>
+    </div>`);
+
+  if (p.isAdmin) {
+    const rows = state.participants.filter((x) => x.active)
+      .map((x) => ({ x, a: analyse(x.id, now), s: monthStats(x.id, todayKey(), now) }));
+    cards.push(`
+      <div class="card">
+        <header><h2>${esc(t('insightGroup'))}</h2><span class="pill gold">${esc(t('admin'))}</span></header>
+        <div class="body scroll">
+          <table>
+            <thead><tr>
+              <th>${esc(t('participant'))}</th><th>${esc(t('successDays'))}</th>
+              <th>${esc(t('pct'))}</th><th>${esc(t('activeTotal'))}</th><th>${esc(t('weaknesses'))}</th>
+            </tr></thead>
+            <tbody>
+              ${rows.map((r) => `<tr>
+                <td>${esc(r.x.name)}</td>
+                <td class="n">${r.s.successDays}</td>
+                <td class="n">${r.s.rate.toFixed(0)}%</td>
+                <td class="n">${fmtDur(r.s.ms)}</td>
+                <td style="white-space:normal;color:var(--ink-2)">${esc(r.a && r.a.weaknesses.length ? r.a.weaknesses[0] : '—')}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`);
+  }
+  return `<div class="stack">${cards.join('')}</div>`;
+}
+
+/* ---------------------------------------------------------- ADMIN */
+function viewAdmin() {
+  return `
+    <div class="card adminwrap">
+      <header><h2>${esc(t('adminPanel'))}</h2><span class="pill gold">${esc(t('admin'))}</span></header>
+      <div class="body stack">
+        <div>
+          <p class="eyebrow" style="margin:0 0 9px">${esc(t('people'))} · ${state.participants.filter((x) => x.active).length}</p>
+          <div class="formrow">
+            <input type="text" id="newPerson" placeholder="${esc(t('personName'))}" />
+            <label class="check"><input type="checkbox" id="newPersonAdmin" /> ${esc(t('makeAdmin'))}</label>
+            <button data-addperson>${esc(t('addPerson'))}</button>
+          </div>
+          <div class="field">
+            <label for="bulkNames">${esc(t('bulkNames'))}</label>
+            <textarea id="bulkNames" placeholder="سامي&#10;عبدالله&#10;خالد"></textarea>
+            <div><button data-bulkadd>${esc(t('bulkAdd'))}</button></div>
+          </div>
+          <div class="scroll"><table><tbody>
+            ${state.participants.map((x) => `
+              <tr id="personrow-${x.id}" style="${x.active ? '' : 'opacity:.45'}">
+                <td>${esc(x.name)} ${x.isAdmin ? `<span class="pill gold">${esc(t('admin'))}</span>` : ''}</td>
+                <td>${x.mustSetPin || !x.pinHash ? `<span class="pill warn">${esc(t('newPin'))}</span>` : ''}</td>
+                <td style="text-align:end">
+                  <button class="ghost sm" data-renameperson="${x.id}">${esc(t('rename'))}</button>
+                  <button class="ghost sm" data-resetpin="${x.id}">${esc(t('resetPin'))}</button>
+                  ${x.active ? `<button class="ghost sm danger" data-removeperson="${x.id}">${esc(t('remove'))}</button>` : ''}
+                </td>
+              </tr>`).join('')}
+          </tbody></table></div>
+        </div>
+
+        <div>
+          <p class="eyebrow" style="margin:0 0 9px">${esc(t('tasksAdmin'))} · ${activeTasks().length}</p>
+          <div class="formrow">
+            <input type="text" id="newTask" placeholder="${esc(t('taskName'))}" />
+            <label class="check"><input type="checkbox" id="newTaskCounts" checked /> ${esc(t('counts'))}</label>
+            <button data-addtask>${esc(t('addPerson'))}</button>
+          </div>
+          <div class="scroll"><table><tbody>
+            ${state.tasks.slice().sort((a, b) => a.pos - b.pos).map((x) => `
+              <tr id="taskrow-${x.id}" style="${x.archived ? 'opacity:.45' : ''}">
+                <td style="white-space:normal">${esc(x.name)}</td>
+                <td>${x.counts ? '' : `<span class="pill mute">${esc(t('noCount'))}</span>`}</td>
+                <td style="text-align:end">
+                  <button class="ghost sm" data-renametask="${x.id}">${esc(t('rename'))}</button>
+                  <button class="ghost sm" data-togglecount="${x.id}">${esc(t('counts'))}</button>
+                  <button class="ghost sm ${x.archived ? '' : 'danger'}" data-archivetask="${x.id}">
+                    ${esc(x.archived ? t('restore') : t('archive'))}</button>
+                </td>
+              </tr>`).join('')}
+          </tbody></table></div>
+        </div>
+
+        <div>
+          <p class="eyebrow" style="margin:0 0 9px">${esc(t('settings'))}</p>
+          <div class="formrow">
+            <button data-exportcsv>${esc(t('exportCsv'))}</button>
+            <button data-exportpdf>${esc(t('exportPdf'))}</button>
+            <button class="danger" data-wipe>${esc(t('resetAll'))}</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function modalFinish() {
+  const task = taskById(ui.finishing);
+  return `
+    <div class="veil" data-veil>
+      <div class="modal" role="dialog" aria-modal="true" aria-label="${esc(t('howEnded'))}">
+        <h3>${esc(t('howEnded'))}</h3>
+        <p class="hint">${esc(task ? task.name : '')}</p>
+        <div class="choices">
+          <button class="primary" data-outcome="completed">
+            ${esc(t('didIt'))}<br /><small style="font-weight:500;opacity:.8">${esc(t('didItSub'))}</small>
+          </button>
+          <button data-outcome="attempted">
+            ${esc(t('triedIt'))}<br /><small style="font-weight:500;color:var(--ink-3)">${esc(t('triedItSub'))}</small>
+          </button>
+          <button class="ghost" data-outcome="">${esc(t('cancel'))}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* Bring a freshly added row into view and mark it briefly. Without this the new
+   row lands below the fold and looks like the add silently failed. */
+function revealRow(id) {
+  const row = document.getElementById(id);
+  if (!row) return;
+  row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  row.classList.add('flash');
+  setTimeout(() => row.classList.remove('flash'), 1700);
+}
+
+/* ---------------------------------------------------------- events */
+function on(sel, fn) {
+  app().querySelectorAll(sel).forEach((el) => el.addEventListener('click', (e) => {
+    e.preventDefault();
+    fn(el, e);
+  }));
+}
+
+function wire() {
+  on('[data-lang]', () => { L = L === 'ar' ? 'en' : 'ar'; render(); });
+  on('[data-jump]', (el) => {
+    const target = document.getElementById(el.dataset.jump);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  on('[data-celebclose]', () => { ui.celebrate = null; render(); });
+  on('[data-celebveil]', (el, e) => { if (e.target === el) { ui.celebrate = null; render(); } });
+  on('[data-day]', (el) => {
+    const step = Number(el.dataset.day);
+    ui.dayOffset = step === 0 ? 0 : Math.min(0, ui.dayOffset + step);
+    render();
+  });
+
+  on('[data-pick]', (el) => {
+    ui.pickedId = Number(el.dataset.pick); ui.error = ''; render();
+    setTimeout(() => { const i = document.getElementById('pin1'); if (i) i.focus(); }, 10);
+  });
+  on('[data-back]', () => { ui.pickedId = null; ui.error = ''; render(); });
+
+  const form = document.getElementById('pinform');
+  if (form) form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try { await submitPin(); }
+    catch (err) { ui.error = t('signInFailed'); render(); }
+  });
+
+  on('[data-signout]', () => {
+    state.session = null; ui.pickedId = null; ui.dayOffset = 0; ui.celebrate = null;
+    save(); render();
+  });
+
+  on('[data-startday]', () => { startDay(state.session); notifyOthers(); render(); });
+  on('[data-endday]', () => { endDay(state.session, 'manual'); render(); });
+  on('[data-finishall]', () => {
+    const d = dayOf(state.session, todayKey(), false);
+    if (!d) return;
+    const left = Object.values(d.tasks).filter((v) => v.status !== 'completed').length;
+    if (!left || !confirm(t('confirmFinishAll', { n: left }))) return;
+    finishAllRemaining(state.session);
+    notifyOthers();
+    checkCelebration(state.session);
+    render();
+  });
+
+  on('[data-start]', (el) => { startTask(state.session, Number(el.dataset.start)); render(); });
+  on('[data-pause]', (el) => { pauseTask(state.session, Number(el.dataset.pause)); render(); });
+  on('[data-finish]', (el) => { ui.finishing = Number(el.dataset.finish); render(); });
+  on('[data-reopen]', (el) => { reopenTask(state.session, Number(el.dataset.reopen)); render(); });
+  on('[data-outcome]', (el) => {
+    const outcome = el.dataset.outcome;
+    const id = ui.finishing;
+    ui.finishing = null;
+    if (outcome) {
+      finishTask(state.session, id, outcome);
+      notifyOthers();
+      checkCelebration(state.session);
+    }
+    render();
+  });
+  on('[data-veil]', (el, e) => { if (e.target === el) { ui.finishing = null; render(); } });
+
+  /* Notes save straight into state without a re-render, so the caret never
+     moves while someone is mid-sentence. */
+  app().querySelectorAll('[data-note]').forEach((el) => {
+    el.addEventListener('input', () => {
+      const d = dayOf(state.session, todayKey(), false);
+      if (!d) return;
+      const td = d.tasks[Number(el.dataset.note)];
+      if (!td) return;
+      td.note = el.value;
+      save();
+    });
+  });
+
+  on('[data-exportcsv]', () => exportCsv());
+  on('[data-exportpdf]', () => window.print());
+
+  wireAdmin();
+}
+
+async function submitPin() {
+  const p = personById(ui.pickedId);
+  if (!p) return;
+  if (throttled(p.id)) { ui.error = t('tooMany'); render(); return; }
+
+  const pin1 = (document.getElementById('pin1') || {}).value || '';
+  const first = p.mustSetPin || !p.pinHash;
+  if (!new RegExp('^\\d{' + PIN_LEN + '}$').test(pin1)) { ui.error = t('pinFormat'); render(); return; }
+
+  if (first) {
+    const pin2 = (document.getElementById('pin2') || {}).value || '';
+    if (pin1 !== pin2) { ui.error = t('pinMismatch'); render(); return; }
+    p.pinSalt = newSalt();
+    p.pinHash = await hashPin(pin1, p.pinSalt);
+    p.mustSetPin = false;
+    logEvent(p.id, 'pin_set');
+  } else {
+    const h = await hashPin(pin1, p.pinSalt);
+    if (h !== p.pinHash) { noteFail(p.id); ui.error = t('wrongPin'); render(); return; }
+  }
+
+  delete attempts[p.id];
+  state.session = p.id;
+  ui.error = '';
+  ui.pickedId = null;
+  save();
+  render();
+}
+
+function wireAdmin() {
+  const p = me();
+  if (!p || !p.isAdmin) return;
+
+  const addPerson = (name, isAdmin) => {
+    const id = state.nextPid++;
+    state.participants.push({
+      id, name: name.trim(), pinHash: null, pinSalt: null,
+      mustSetPin: true, isAdmin: !!isAdmin, active: true
+    });
+    logEvent(p.id, 'participant_added', null, name.trim());
+    return id;
+  };
+
+  on('[data-addperson]', () => {
+    const input = document.getElementById('newPerson');
+    const name = input.value.trim();
+    if (!name) { input.focus(); return; }
+    const id = addPerson(name, document.getElementById('newPersonAdmin').checked);
+    input.value = '';
+    save(); render();
+    revealRow('personrow-' + id);
+    toast(t('added', { n: 1 }));
+  });
+
+  on('[data-bulkadd]', () => {
+    const box = document.getElementById('bulkNames');
+    const names = box.value.split('\n').map((s) => s.trim()).filter(Boolean);
+    if (!names.length) { box.focus(); return; }
+    let last = null;
+    for (const n of names) last = addPerson(n, false);
+    box.value = '';
+    save(); render();
+    if (last) revealRow('personrow-' + last);
+    toast(t('added', { n: names.length }));
+  });
+
+  on('[data-renameperson]', (el) => {
+    const x = personById(Number(el.dataset.renameperson));
+    const name = prompt(t('personName'), x.name);
+    if (name && name.trim()) { x.name = name.trim(); save(); render(); }
+  });
+
+  on('[data-resetpin]', (el) => {
+    const x = personById(Number(el.dataset.resetpin));
+    if (!confirm(t('confirmReset', { name: x.name }))) return;
+    x.pinHash = null; x.pinSalt = null; x.mustSetPin = true;
+    logEvent(p.id, 'pin_reset', null, x.name);
+    save(); render(); toast(t('saved'));
+  });
+
+  on('[data-removeperson]', (el) => {
+    const x = personById(Number(el.dataset.removeperson));
+    if (!confirm(t('confirmRemove', { name: x.name }))) return;
+    x.active = false;
+    logEvent(p.id, 'participant_removed', null, x.name);
+    save(); render();
+  });
+
+  on('[data-addtask]', () => {
+    const input = document.getElementById('newTask');
+    const name = input.value.trim();
+    if (!name) { input.focus(); return; }
+    const id = state.nextTid++;
+    state.tasks.push({
+      id, name, counts: document.getElementById('newTaskCounts').checked,
+      archived: false, pos: state.tasks.length
+    });
+    logEvent(p.id, 'task_added', null, name);
+    input.value = '';
+    save(); render();
+    revealRow('taskrow-' + id);
+    toast(t('added', { n: 1 }));
+  });
+
+  on('[data-renametask]', (el) => {
+    const x = taskById(Number(el.dataset.renametask));
+    const name = prompt(t('taskName'), x.name);
+    if (name && name.trim()) {
+      x.name = name.trim();
+      logEvent(p.id, 'task_renamed', x.id, x.name);
+      save(); render();
+    }
+  });
+
+  on('[data-togglecount]', (el) => {
+    const x = taskById(Number(el.dataset.togglecount));
+    x.counts = !x.counts;
+    save(); render();
+  });
+
+  on('[data-archivetask]', (el) => {
+    const x = taskById(Number(el.dataset.archivetask));
+    x.archived = !x.archived;
+    logEvent(p.id, 'task_archived', x.id, x.archived ? 'archived' : 'restored');
+    save(); render();
+  });
+
+  on('[data-wipe]', () => {
+    if (!confirm(t('confirmWipe'))) return;
+    try { localStorage.removeItem(STORE_KEY); } catch (e) { /* storage already unavailable */ }
+    state = seed();
+    ui = { pickedId: null, error: '', finishing: null, dayOffset: 0, seenFeed: 0, celebrate: null };
+    save(); render();
+  });
+}
+
+/* ---------------------------------------------------------- notifications */
+/* Announces momentum to whoever else is on this browser. Cross-device delivery
+   needs the hosted version; this same call site drives it there. */
+let lastFeedAt = 0;
+function notifyOthers() {
+  const dk = todayKey();
+  const fresh = state.log.filter((e) => e.dk === dk && e.at > lastFeedAt && FEED_EVENTS.includes(e.event));
+  if (!fresh.length) return;
+  lastFeedAt = Math.max(...fresh.map((e) => e.at));
+}
+
+function watchFeed() {
+  const dk = todayKey();
+  const latest = state.log.filter((e) => e.dk === dk && FEED_EVENTS.includes(e.event));
+  if (!latest.length) return;
+  const newest = latest[latest.length - 1];
+  if (newest.at <= ui.seenFeed) return;
+  ui.seenFeed = newest.at;
+  const who = personById(newest.pid);
+  if (!who || who.id === state.session) return;
+  const task = newest.taskId ? taskById(newest.taskId) : null;
+  toast(`${who.name} ${(EVENT_LABEL[L] || EVENT_LABEL.ar)[newest.event]}${task ? ' ' + task.name : ''}`);
+}
+
+/* ---------------------------------------------------------- export */
+function buildCsv() {
+  const now = Date.now();
+  const head = ['participant', 'day', 'weekday', 'week_of', 'task', 'note', 'status', 'active_seconds', 'pauses', 'reopens', 'day_done', 'day_total', 'day_percent', 'day_success'];
+  const lines = [head.join(',')];
+  const q = (v) => '"' + String(v == null ? '' : v).split('"').join('""') + '"';
+
+  for (const p of state.participants) {
+    const days = state.days[p.id] || {};
+    for (const dk of Object.keys(days).sort()) {
+      const s = dayStats(p.id, dk, now);
+      for (const [tid, td] of Object.entries(days[dk].tasks)) {
+        const task = taskById(Number(tid));
+        lines.push([
+          q(p.name), q(dk), q(DAY_NAMES.en[weekdayOf(dk)]), q(weekStartOf(dk)),
+          q(task ? task.name : tid), q(td.note || ''), q(td.status),
+          Math.round(taskMs(days[dk], Number(tid), now) / 1000),
+          td.pauses, td.reopens, s.done, s.total, pct(s.done, s.total), s.pass ? 1 : 0
+        ].join(','));
+      }
+    }
+  }
+  return lines.join('\n');
+}
+
+async function exportCsv() {
+  const csv = '﻿' + buildCsv(); // BOM so Excel reads the Arabic correctly
+  const stamp = todayKey();
+  if (!window.claude || !window.claude.downloads) { toast(t('exportOff')); return; }
+  try {
+    await window.claude.downloads.save({ filename: `rehla-${stamp}.csv`, data: csv });
+    toast(t('exported'));
+  } catch (err) {
+    if (err && err.code === 'extension_not_enabled') {
+      try {
+        await window.claude.downloads.save({ filename: `rehla-${stamp}.txt`, data: csv });
+        toast(t('exported'));
+      } catch (e2) { toast(e2 && e2.code === 'declined' ? t('declined') : t('error')); }
+      return;
+    }
+    toast(err && err.code === 'declined' ? t('declined') : t('error'));
+  }
+}
+
+/* ---------------------------------------------------------- tick */
+/* Updates clock text only — never re-renders, so focus and typing survive. */
+function tick() {
+  const now = Date.now();
+  const p = me();
+  if (!p) return;
+
+  document.querySelectorAll('[data-clock="task"]').forEach((el) => {
+    const base = Number(el.dataset.base) || 0;
+    const since = el.dataset.since ? Number(el.dataset.since) : null;
+    el.textContent = fmtDur(since ? base + (now - since) : base);
+  });
+
+  const dayEl = document.querySelector('[data-clock="day"]');
+  if (dayEl) dayEl.textContent = fmtDur(dayStats(p.id, viewedDay(), now).ms);
+}
+
+/* ---------------------------------------------------------- boot */
+load();
+if (state.session && !state.participants.some((p) => p.id === state.session && p.active)) state.session = null;
+render();
+setInterval(() => { tick(); watchFeed(); }, 1000);
+
+let watchedDay = todayKey();
+setInterval(() => {
+  const d = todayKey();
+  if (d !== watchedDay) { watchedDay = d; ui.dayOffset = 0; render(); }
+}, 30000);
+</script>

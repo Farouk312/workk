@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($sp=\"C:\\\\Users\\\\Admin\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Admin-Desktop-Claude-Ai\\\\48f85939-03ae-41bd-b427-9d93f98e0b8c\\\\scratchpad\"; & pdftotext -enc UTF-8 -layout \"C:\\\\Users\\\\Admin\\\\Desktop\\\\complete_project_requirements_english.pdf\" \"$sp\\\\spec_en.txt\"; & pdftotext -enc UTF-8 -layout \"C:\\\\Users\\\\Admin\\\\Desktop\\\\قفاقاقلقثرلاث5قصل.pdf\" \"$sp\\\\spec_2.txt\"; Get-ChildItem $sp | Select-Object Name, Length)",
+      "PowerShell(node -v)",
+      "PowerShell(npm -v)",
+      "PowerShell(node -e \"console.log\\('has node:sqlite =', \\(\\(\\)=>{try{require\\('node:sqlite'\\);return true}catch\\(e\\){return false}}\\)\\(\\)\\)\")",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Admin\\\\Desktop\\\\Claude Ai\\\\dashboard\" | Select-Object Name, @{n='KB';e={[math]::Round\\($_.Length/1KB,1\\)}}, LastWriteTime)"
+    ]
+  }
+}

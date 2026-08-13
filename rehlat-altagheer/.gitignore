@@ -1,0 +1,18 @@
+node_modules/
+.next/
+out/
+build/
+
+# Local database — contains real participant data and PIN hashes. Never commit.
+data/
+*.db
+*.db-journal
+*.db-wal
+
+.env
+.env.local
+.env*.local
+
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
