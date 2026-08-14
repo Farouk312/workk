@@ -2267,19 +2267,19 @@ function viewAdmin() {
             <textarea id="bulkNames" placeholder="سامي&#10;عبدالله&#10;خالد"></textarea>
             <div><button data-bulkadd>${esc(t('bulkAdd'))}</button></div>
           </div>
-          <div class="scroll"><table><tbody>
-            ${state.participants.map((x) => `
-              <tr id="personrow-${x.id}" style="${x.active ? '' : 'opacity:.45'}">
-                <td>${esc(x.name)} ${x.isAdmin ? `<span class="pill gold">${esc(t('admin'))}</span>` : ''}</td>
-                <td>${x.mustSetPin || !x.pinHash ? `<span class="pill warn">${esc(t('newPin'))}</span>` : ''}</td>
-                <td style="text-align:end">
-                  <button class="ghost sm" data-renameperson="${x.id}">${esc(t('rename'))}</button>
-                  <button class="ghost sm" data-resetpin="${x.id}">${esc(t('resetPin'))}</button>
-                  ${x.active ? `<button class="ghost sm danger" data-removeperson="${x.id}">${esc(t('remove'))}</button>` : ''}
-                </td>
-              </tr>`).join('')}
-          </tbody></table></div>
-        </div>
+          <div class="scroll"><table><tbody> 
+  ${state.participants.filter((x) => x.active).map((x) => ` 
+    <tr id="personrow-${x.id}"> 
+      <td>${esc(x.name)} ${x.isAdmin ? `<span class="pill gold">${esc(t('admin'))}</span>` : ''}</td> 
+      <td>${x.mustSetPin || !x.pinHash ? `<span class="pill warn">${esc(t('newPin'))}</span>` : ''}</td> 
+      <td style="text-align:end"> 
+        <button class="ghost sm" data-renameperson="${x.id}">${esc(t('rename'))}</button> 
+        <button class="ghost sm" data-resetpin="${x.id}">${esc(t('resetPin'))}</button> 
+        <button class="ghost sm danger" data-removeperson="${x.id}">${esc(t('remove'))}</button>
+      </td> 
+    </tr>`).join('')} 
+</tbody></table></div> 
+</div>
 
         <div>
           <p class="eyebrow" style="margin:0 0 9px">${esc(t('tasksAdmin'))} · ${activeTasks().length}</p>
