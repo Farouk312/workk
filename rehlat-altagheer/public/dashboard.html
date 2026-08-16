@@ -986,6 +986,360 @@ button:focus-visible {
   min-width: 0;
   overflow-x: clip;
 }
+
+/* ===== FINAL MOBILE WIDTH FIX ===== */
+
+@media (max-width: 700px) {
+
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .wrap,
+  .adminwrap,
+  .admin,
+  .container,
+  .page {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .wrap {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .adminwrap {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .adminwrap .card,
+  .adminwrap > .card,
+  .adminwrap section {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .adminwrap .formrow,
+  .adminwrap .field,
+  .adminwrap input,
+  .adminwrap textarea,
+  .adminwrap select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .adminwrap .scroll {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Keep only tables scrollable */
+  .adminwrap table {
+    width: 100%;
+    min-width: 600px;
+  }
+
+  /* Buttons don't force the page wider */
+  .adminwrap button {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+
+  .wrap {
+    width: 100% !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .adminwrap {
+    width: 100% !important;
+  }
+}
+
+/* =========================================================
+   FINAL UI POLISH — MOBILE ADMIN
+   ========================================================= */
+
+.adminwrap {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, .18);
+}
+
+.adminwrap > header {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.adminwrap .body {
+  gap: 22px;
+}
+
+/* Section titles */
+.adminwrap .eyebrow {
+  font-size: .78rem;
+  letter-spacing: .02em;
+  color: var(--ink-2);
+}
+
+/* Add forms */
+.adminwrap .formrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.adminwrap .formrow input[type="text"] {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+}
+
+.adminwrap .formrow button {
+  min-height: 44px;
+}
+
+.adminwrap .check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding-inline: 10px;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+/* Participant/task lists */
+.adminwrap .scroll {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.015);
+}
+
+.adminwrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.adminwrap table tr {
+  transition: background .15s ease;
+}
+
+.adminwrap table tr:hover {
+  background: rgba(255,255,255,.025);
+}
+
+.adminwrap table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.adminwrap table tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Action buttons */
+.adminwrap table td:last-child {
+  white-space: nowrap;
+}
+
+.adminwrap table td:last-child button {
+  margin-inline-start: 4px;
+}
+
+.adminwrap button.ghost.sm {
+  min-height: 36px;
+  padding: 7px 10px;
+  border-radius: 9px;
+}
+
+/* Danger action */
+.adminwrap button.danger {
+  border-color: rgba(255, 100, 100, .35);
+}
+
+/* Export/settings area */
+.adminwrap .body > div:last-child {
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+
+.adminwrap .body > div:last-child .formrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.adminwrap .body > div:last-child button {
+  flex: 1 1 150px;
+}
+
+/* =========================================================
+   PHONE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .adminwrap {
+    border-radius: 14px;
+    margin-inline: 0;
+  }
+
+  .adminwrap > header {
+    min-height: 52px;
+    padding: 11px 12px;
+  }
+
+  .adminwrap > header h2 {
+    font-size: 1rem;
+  }
+
+  .adminwrap .body {
+    padding: 12px !important;
+    gap: 18px;
+  }
+
+  /* Add participant/task */
+  .adminwrap .formrow {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .adminwrap .formrow input[type="text"] {
+    height: 46px;
+  }
+
+  .adminwrap .formrow button,
+  .adminwrap .formrow .check {
+    width: 100%;
+  }
+
+  .adminwrap .check {
+    justify-content: flex-start;
+    padding-inline: 4px;
+    min-height: 36px;
+  }
+
+  /* Bulk textarea */
+  .adminwrap textarea {
+    min-height: 100px;
+    border-radius: 10px;
+    line-height: 1.7;
+  }
+
+  /* Keep table inside its own area */
+  .adminwrap .scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 11px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .adminwrap table {
+    min-width: 540px;
+  }
+
+  .adminwrap table td {
+    padding: 10px 8px;
+    font-size: .86rem;
+  }
+
+  /* Better action buttons on mobile */
+  .adminwrap table td:last-child {
+    white-space: nowrap;
+  }
+
+  .adminwrap table td:last-child button {
+    min-height: 34px;
+    padding: 6px 9px;
+    margin-inline-start: 3px;
+    font-size: .75rem;
+  }
+
+  /* Settings */
+  .adminwrap .body > div:last-child .formrow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .adminwrap .body > div:last-child button {
+    width: 100%;
+    min-height: 43px;
+  }
+
+  /* Pills */
+  .adminwrap .pill {
+    font-size: .68rem;
+    padding: 3px 7px;
+  }
+}
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+  .adminwrap > header {
+    padding: 10px;
+  }
+
+  .adminwrap .body {
+    padding: 9px !important;
+  }
+
+  .adminwrap .body {
+    gap: 15px;
+  }
+
+  .adminwrap .scroll {
+    border-radius: 9px;
+  }
+
+  .adminwrap table {
+    min-width: 500px;
+  }
+
+  .adminwrap table td {
+    padding: 9px 7px;
+    font-size: .8rem;
+  }
+
+  .adminwrap table td:last-child button {
+    font-size: .7rem;
+    padding: 5px 7px;
+  }
+
+  .adminwrap .formrow input[type="text"] {
+    height: 43px;
+  }
+
+  .adminwrap .formrow button {
+    min-height: 42px;
+  }
+}
 </style>
 
 <div class="wrap" id="app"></div>
