@@ -3513,23 +3513,28 @@ const first = p.mustSetPin === true;
     }
 
     // Successful login
-    delete attempts[p.id];
+delete attempts[p.id];
 
-    state.session = p.id;
+state.session = p.id;
 
-    localStorage.setItem(
-      'rehla.session',
-      String(p.id)
-    );
+localStorage.setItem(
+  'rehla.session',
+  String(p.id)
+);
 
-    ui.error = '';
-    ui.pickedId = null;
+ui.error = '';
+ui.pickedId = null;
 
-    render();
+// Now that the signed session cookie exists,
+// reload the protected dashboard data from Supabase.
+await load();
 
-    save().catch((error) => {
-      console.error('Background dashboard save failed:', error);
-    });
+// Keep the current session if load() did not restore it.
+if (!state.session) {
+  state.session = p.id;
+}
+
+render();
 
   } catch (error) {
     console.error('AUTH REQUEST ERROR:', error);
