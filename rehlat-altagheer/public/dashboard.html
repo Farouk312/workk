@@ -1696,16 +1696,21 @@ async function load() {
     // This is important: taskById() uses state.tasks, but state is still being
     // constructed at this point. Using this local map prevents the old
     // "Cannot read properties of null (reading 'tasks')" crash.
-    const participants = (data.participants || []).map((p) => ({
-      ...p,
-      id: Number(p.id),
-      pinHash: p.pinHash ?? p.pin_hash ?? null,
-      pinSalt: p.pinSalt ?? p.pin_salt ?? null,
-      mustSetPin: p.mustSetPin ?? p.must_set_pin ?? true,
-      isAdmin: p.isAdmin ?? p.is_admin ?? false,
-      active: p.active !== false
-    }));
+  const participants = (data.participants || []).map((p) => ({
+  ...p,
+  id: Number(p.id),
 
+  // PIN secrets are never used by the frontend.
+  pinHash: null,
+  pinSalt: null,
+
+  // Safe PIN status returned by the server.
+  hasPin: p.hasPin ?? p.has_pin ?? false,
+
+  mustSetPin: p.mustSetPin ?? p.must_set_pin ?? false,
+  isAdmin: p.isAdmin ?? p.is_admin ?? false,
+  active: p.active !== false
+}));
     const tasks = (data.tasks || []).map((t) => ({
       ...t,
       id: Number(t.id),
@@ -1777,7 +1782,7 @@ for (const pid of Object.keys(days)) {
 
 // Task status for each participant/day
 for (const row of data.task_days || []) {
- 
+
       const pid = Number(row.participant_id);
       const dk = row.day_key;
       const taskId = Number(row.task_id);
@@ -1869,21 +1874,91 @@ for (const row of data.task_days || []) {
 
     console.log("Dashboard state restored. Session:", state.session);
   } catch (error) {
-    console.error("Failed to load dashboard from API:", error);
+  console.error("Failed to load dashboard from API:", error);
 
-    // Do NOT silently replace a previously valid in-memory state with a fresh
-    // seed. This was another source of data disappearing after a load error.
+  /*
+   * The dashboard API is protected and correctly returns 401
+   * before login.
+   *
+   * We must NOT fall back to seed() here because seed() marks
+   * every participant as mustSetPin=true.
+   *
+   * Instead, load only the public participant authentication
+   * information from /api/auth.
+   */
+  try {
+    const authResponse = await fetch("/api/auth", {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    if (!authResponse.ok) {
+      throw new Error("Failed to load authentication participants");
+    }
+
+    const authData = await authResponse.json();
+
+    const participants = Array.isArray(authData.participants)
+      ? authData.participants.map((p) => ({
+          id: Number(p.id),
+          name: p.name,
+          active: p.active !== false,
+
+          // IMPORTANT:
+          // These values now come directly from Supabase.
+          mustSetPin:
+            p.must_set_pin === true,
+
+          hasPin:
+            p.has_pin === true,
+
+          isAdmin: false
+        }))
+      : [];
+
+    if (!participants.length) {
+      throw new Error("No active participants found");
+    }
+
+    /*
+     * Keep enough state for the login screen.
+     * Do NOT create fake PIN data.
+     */
+    state = {
+      ...(state || {}),
+      participants,
+      tasks: state?.tasks || [],
+      days: state?.days || {},
+      log: state?.log || [],
+      settings: state?.settings || {},
+      nextPid:
+        Math.max(
+          0,
+          ...participants.map((p) => Number(p.id) || 0)
+        ) + 1,
+      nextTid: state?.nextTid || 1,
+      session: null
+    };
+
+    console.log(
+      "Authentication participants loaded:",
+      participants
+    );
+  } catch (authError) {
+    console.error(
+      "Failed to load authentication participants:",
+      authError
+    );
+
+    /*
+     * Only use seed as a last-resort UI fallback.
+     * It must NEVER be used for a real authentication decision.
+     */
     if (!state) {
       state = seed();
-
-      // If the API is temporarily unavailable, still restore the browser
-      // session when possible. It will be validated again on the next load.
-      try {
-        const id = Number(localStorage.getItem('rehla.session'));
-        if (Number.isInteger(id) && id > 0) state.session = id;
-      } catch (e) {}
     }
   }
+}
 }
 
 let saveQueue = Promise.resolve();
@@ -2301,9 +2376,10 @@ function viewLogin() {
       </div>`;
   }
 
-  const first = p.mustSetPin || !p.pinHash;
-  return `
-    <div class="login">
+const first = p.mustSetPin === true;
+
+return `
+ <div class="login">
       <div class="topbar" style="border:none;padding:0;margin-bottom:18px">
         <div class="brand">
           <div class="mark"></div>
@@ -2311,8 +2387,7 @@ function viewLogin() {
         </div>${langBtn}
       </div>
       <div class="card"><div class="body">
-        ${first ? `<p class="hint" style="margin-bottom:12px">${esc(p.pinHash ? t('afterReset') : t('firstTime'))}</p>` : ''}
-        <form id="pinform" style="display:grid;gap:10px">
+${first ? `<p class="hint" style="margin-bottom:12px">${esc(p.hasPin ? t('afterReset') : t('firstTime'))}</p>` : ''}        <form id="pinform" style="display:grid;gap:10px">
           <div class="pinrow">
             <input id="pin1" type="password" inputmode="numeric" autocomplete="off"
                    maxlength="${PIN_LEN}" placeholder="••••" aria-label="${esc(t('enterPin'))}" />
@@ -3174,18 +3249,18 @@ function viewAdmin() {
             <textarea id="bulkNames" placeholder="سامي&#10;عبدالله&#10;خالد"></textarea>
             <div><button data-bulkadd>${esc(t('bulkAdd'))}</button></div>
           </div>
-          <div class="scroll"><table><tbody> 
-  ${state.participants.filter((x) => x.active).map((x) => ` 
-    <tr id="personrow-${x.id}"> 
-      <td>${esc(x.name)} ${x.isAdmin ? `<span class="pill gold">${esc(t('admin'))}</span>` : ''}</td> 
-      <td>${x.mustSetPin || !x.pinHash ? `<span class="pill warn">${esc(t('newPin'))}</span>` : ''}</td> 
-      <td style="text-align:end"> 
-        <button class="ghost sm" data-renameperson="${x.id}">${esc(t('rename'))}</button> 
-        <button class="ghost sm" data-resetpin="${x.id}">${esc(t('resetPin'))}</button> 
+          <div class="scroll"><table><tbody>
+  ${state.participants.filter((x) => x.active).map((x) => `
+    <tr id="personrow-${x.id}">
+      <td>${esc(x.name)} ${x.isAdmin ? `<span class="pill gold">${esc(t('admin'))}</span>` : ''}</td>
+      <td>${x.mustSetPin || !x.pinHash ? `<span class="pill warn">${esc(t('newPin'))}</span>` : ''}</td>
+      <td style="text-align:end">
+        <button class="ghost sm" data-renameperson="${x.id}">${esc(t('rename'))}</button>
+        <button class="ghost sm" data-resetpin="${x.id}">${esc(t('resetPin'))}</button>
         <button class="ghost sm danger" data-removeperson="${x.id}">${esc(t('remove'))}</button>
-      </td> 
-    </tr>`).join('')} 
-</tbody></table></div> 
+      </td>
+    </tr>`).join('')}
+</tbody></table></div>
 </div>
 
         <div>
@@ -3356,61 +3431,114 @@ async function submitPin() {
     return;
   }
 
-  const pin1 = (document.getElementById('pin1') || {}).value || '';
-  const first = p.mustSetPin || !p.pinHash;
+const pin1 = (document.getElementById('pin1') || {}).value || '';
 
+const first = p.mustSetPin === true;
+  // Validate PIN format
   if (!new RegExp('^\\d{' + PIN_LEN + '}$').test(pin1)) {
     ui.error = t('pinFormat');
     render();
     return;
   }
 
+  // First-time PIN setup needs confirmation
   if (first) {
     const pin2 = (document.getElementById('pin2') || {}).value || '';
+
+    if (!new RegExp('^\\d{' + PIN_LEN + '}$').test(pin2)) {
+      ui.error = t('pinFormat');
+      render();
+      return;
+    }
 
     if (pin1 !== pin2) {
       ui.error = t('pinMismatch');
       render();
       return;
     }
+  }
 
-    p.pinSalt = newSalt();
-    p.pinHash = await hashPin(pin1, p.pinSalt);
-    p.mustSetPin = false;
+  try {
+    const response = await fetch('/api/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: first ? 'set' : 'login',
+        participantId: Number(p.id),
+        pin: pin1
+      })
+    });
 
-    logEvent(p.id, 'pin_set');
+    const data = await response.json();
 
-  } else {
-    const h = await hashPin(pin1, p.pinSalt);
-
-    if (h !== p.pinHash) {
+    // Wrong PIN
+    if (response.status === 401 && data?.error === 'wrong_pin') {
       noteFail(p.id);
       ui.error = t('wrongPin');
       render();
       return;
     }
+
+    if (response.status === 409 && data?.error === 'pin_already_set') {
+      ui.error = t('signInFailed');
+      render();
+      return;
+    }
+
+    // PIN not configured
+    if (response.status === 409 && data?.error === 'pin_not_set') {
+      ui.error = t('signInFailed');
+      render();
+      return;
+    }
+
+    // Any other authentication error
+    if (!response.ok || !data?.success) {
+      console.error('AUTH ERROR:', data);
+
+      ui.error = data?.error === 'Invalid PIN'
+        ? t('pinFormat')
+        : t('signInFailed');
+
+      render();
+      return;
+    }
+
+    // Successful first-time PIN setup
+    if (first) {
+      p.mustSetPin = false;
+      logEvent(p.id, 'pin_set');
+    }
+
+    // Successful login
+    delete attempts[p.id];
+
+    state.session = p.id;
+
+    localStorage.setItem(
+      'rehla.session',
+      String(p.id)
+    );
+
+    ui.error = '';
+    ui.pickedId = null;
+
+    render();
+
+    save().catch((error) => {
+      console.error('Background dashboard save failed:', error);
+    });
+
+  } catch (error) {
+    console.error('AUTH REQUEST ERROR:', error);
+
+    ui.error = t('signInFailed');
+    render();
   }
-
-  delete attempts[p.id];
-
-  state.session = p.id;
-
-  localStorage.setItem(
-    'rehla.session',
-    String(p.id)
-  );
-
-  ui.error = '';
-  ui.pickedId = null;
-
-  // Open dashboard immediately
-  render();
-
-  // Save in background
-  save().catch((error) => {
-    console.error('Background save failed:', error);
-  });
 }
+
 
 function wireAdmin() {
   const p = me();
@@ -3455,13 +3583,53 @@ function wireAdmin() {
     if (name && name.trim()) { x.name = name.trim(); save(); render(); }
   });
 
-  on('[data-resetpin]', (el) => {
-    const x = personById(Number(el.dataset.resetpin));
-    if (!confirm(t('confirmReset', { name: x.name }))) return;
-    x.pinHash = null; x.pinSalt = null; x.mustSetPin = true;
+ on('[data-resetpin]', async (el) => {
+  const x = personById(Number(el.dataset.resetpin));
+  if (!x) return;
+
+  if (!confirm(t('confirmReset', { name: x.name }))) return;
+
+  try {
+    const response = await fetch('/api/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'reset',
+        participantId: Number(x.id),
+        adminId: Number(p.id)
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      console.error('PIN RESET ERROR:', data);
+      toast(t('signInFailed'));
+      return;
+    }
+
+    // Keep the local state synchronized.
+    x.pinHash = null;
+    x.pinSalt = null;
+    x.mustSetPin = true;
+
     logEvent(p.id, 'pin_reset', null, x.name);
-    save(); render(); toast(t('saved'));
-  });
+
+    // Save the activity log and other dashboard state.
+    save().catch((error) => {
+      console.error('Background save after PIN reset failed:', error);
+    });
+
+    render();
+    toast(t('saved'));
+
+  } catch (error) {
+    console.error('PIN RESET REQUEST ERROR:', error);
+    toast(t('signInFailed'));
+  }
+});
 
   on('[data-removeperson]', (el) => {
     const x = personById(Number(el.dataset.removeperson));

@@ -1,42 +1,45 @@
 import { NextResponse } from "next/server";
 import { supabase } from "../../../src/lib/supabase";
+import { requireActor, HttpError } from "../../../src/lib/auth";
 
 export async function POST(request: Request) {
   try {
+    /* =========================================================
+       AUTHENTICATION
+       The participant comes from the signed session cookie.
+       NEVER trust participantId from the request body.
+       ========================================================= */
+
+    const actor = await requireActor();
+    const participantId = actor.id;
+
     const body = await request.json();
 
-    const action = body.action;
-    const participantId = Number(body.participantId);
-    const taskId = Number(body.taskId);
+    const action = body?.action;
+    const taskId = Number(body?.taskId);
 
     if (!action) {
       return NextResponse.json(
-        { success: false, error: "action is required" },
+        {
+          success: false,
+          error: "action is required",
+        },
         { status: 400 }
       );
     }
 
-    if (!participantId || Number.isNaN(participantId)) {
-      return NextResponse.json(
-        { success: false, error: "participantId is required" },
-        { status: 400 }
-      );
-    }
-
-    /*
-     * =========================================
-     * START DAY
-     * =========================================
-     */
+    /* =========================================================
+       START DAY
+       ========================================================= */
 
     if (action === "start_day") {
       const dayKey =
-        body.dayKey ??
-        new Date().toISOString().slice(0, 10);
+        typeof body.dayKey === "string" && body.dayKey.trim()
+          ? body.dayKey.trim()
+          : new Date().toISOString().slice(0, 10);
 
       const now = Date.now();
 
-      // Check if there is already an active session
       const existing = await supabase
         .from("daily_sessions")
         .select("*")
@@ -78,6 +81,7 @@ export async function POST(request: Request) {
             end_reason: null,
           })
           .eq("id", existing.data.id)
+          .eq("participant_id", participantId)
           .select()
           .single();
 
@@ -121,7 +125,6 @@ export async function POST(request: Request) {
         session = result.data;
       }
 
-      // Log activity
       const log = await supabase
         .from("activity_log")
         .insert({
@@ -151,19 +154,21 @@ export async function POST(request: Request) {
       });
     }
 
-    /*
-     * =========================================
-     * END DAY
-     * =========================================
-     */
+    /* =========================================================
+       END DAY
+       ========================================================= */
 
     if (action === "end_day") {
       const dayKey =
-        body.dayKey ??
-        new Date().toISOString().slice(0, 10);
+        typeof body.dayKey === "string" && body.dayKey.trim()
+          ? body.dayKey.trim()
+          : new Date().toISOString().slice(0, 10);
 
       const now = Date.now();
-      const reason = body.reason ?? "manual";
+      const reason =
+        typeof body.reason === "string" && body.reason.trim()
+          ? body.reason.trim()
+          : "manual";
 
       const existing = await supabase
         .from("daily_sessions")
@@ -212,6 +217,7 @@ export async function POST(request: Request) {
           end_reason: reason,
         })
         .eq("id", existing.data.id)
+        .eq("participant_id", participantId)
         .select()
         .single();
 
@@ -255,14 +261,12 @@ export async function POST(request: Request) {
       });
     }
 
-    /*
-     * =========================================
-     * START TASK
-     * =========================================
-     */
+    /* =========================================================
+       START TASK
+       ========================================================= */
 
     if (action === "start_task") {
-      if (!taskId || Number.isNaN(taskId)) {
+      if (!Number.isInteger(taskId) || taskId <= 0) {
         return NextResponse.json(
           {
             success: false,
@@ -273,12 +277,14 @@ export async function POST(request: Request) {
       }
 
       const dayKey =
-        body.dayKey ??
-        new Date().toISOString().slice(0, 10);
+        typeof body.dayKey === "string" && body.dayKey.trim()
+          ? body.dayKey.trim()
+          : new Date().toISOString().slice(0, 10);
 
       const now = Date.now();
 
-      // Make sure the day is active
+      /* Make sure the day is active */
+
       const session = await supabase
         .from("daily_sessions")
         .select("*")
@@ -317,7 +323,8 @@ export async function POST(request: Request) {
         );
       }
 
-      // Make sure the task exists
+      /* Make sure the task exists */
+
       const task = await supabase
         .from("tasks")
         .select("*")
@@ -345,7 +352,8 @@ export async function POST(request: Request) {
         );
       }
 
-      // Check if another task is already running
+      /* Check if another task is already running */
+
       const openInterval = await supabase
         .from("task_intervals")
         .select("*")
@@ -376,7 +384,8 @@ export async function POST(request: Request) {
         );
       }
 
-      // Create or update task day
+      /* Create or update task day */
+
       const taskDay = await supabase
         .from("task_days")
         .upsert(
@@ -404,7 +413,8 @@ export async function POST(request: Request) {
         );
       }
 
-      // Start timer interval
+      /* Start timer interval */
+
       const interval = await supabase
         .from("task_intervals")
         .insert({
@@ -428,7 +438,8 @@ export async function POST(request: Request) {
         );
       }
 
-      // Log activity
+      /* Log activity */
+
       const log = await supabase
         .from("activity_log")
         .insert({
@@ -450,7 +461,6 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
-    
 
       return NextResponse.json({
         success: true,
@@ -461,230 +471,254 @@ export async function POST(request: Request) {
       });
     }
 
-    /*
- * =========================================
- * COMPLETE TASK
- * =========================================
- */
+    /* =========================================================
+       COMPLETE TASK
+       ========================================================= */
 
-if (action === "complete_task") {
-  const dayKey =
-    body.dayKey ??
-    new Date().toISOString().slice(0, 10);
+    if (action === "complete_task") {
+      if (!Number.isInteger(taskId) || taskId <= 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "taskId is required",
+          },
+          { status: 400 }
+        );
+      }
 
-  const now = Date.now();
+      const dayKey =
+        typeof body.dayKey === "string" && body.dayKey.trim()
+          ? body.dayKey.trim()
+          : new Date().toISOString().slice(0, 10);
 
-  // Make sure the day is active
-  const session = await supabase
-    .from("daily_sessions")
-    .select("*")
-    .eq("participant_id", participantId)
-    .eq("day_key", dayKey)
-    .maybeSingle();
+      const now = Date.now();
 
-  if (session.error) {
-    return NextResponse.json(
-      {
-        success: false,
-        step: "find_session",
-        error: session.error.message,
-      },
-      { status: 500 }
-    );
-  }
+      /* Make sure the day is active */
 
-  if (!session.data) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: "No day session found",
-      },
-      { status: 404 }
-    );
-  }
+      const session = await supabase
+        .from("daily_sessions")
+        .select("*")
+        .eq("participant_id", participantId)
+        .eq("day_key", dayKey)
+        .maybeSingle();
 
-  if (session.data.state !== "active") {
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Day is not active",
-      },
-      { status: 409 }
-    );
-  }
+      if (session.error) {
+        return NextResponse.json(
+          {
+            success: false,
+            step: "find_session",
+            error: session.error.message,
+          },
+          { status: 500 }
+        );
+      }
 
-  // Find the task
-  const task = await supabase
-    .from("tasks")
-    .select("*")
-    .eq("id", taskId)
-    .maybeSingle();
+      if (!session.data) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "No day session found",
+          },
+          { status: 404 }
+        );
+      }
 
-  if (task.error) {
-    return NextResponse.json(
-      {
-        success: false,
-        step: "find_task",
-        error: task.error.message,
-      },
-      { status: 500 }
-    );
-  }
+      if (session.data.state !== "active") {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Day is not active",
+          },
+          { status: 409 }
+        );
+      }
 
-  if (!task.data) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Task not found",
-      },
-      { status: 404 }
-    );
-  }
+      /* Find the task */
 
-  // Find the current task day
-  const taskDay = await supabase
-    .from("task_days")
-    .select("*")
-    .eq("participant_id", participantId)
-    .eq("task_id", taskId)
-    .eq("day_key", dayKey)
-    .maybeSingle();
+      const task = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("id", taskId)
+        .maybeSingle();
 
-  if (taskDay.error) {
-    return NextResponse.json(
-      {
-        success: false,
-        step: "find_task_day",
-        error: taskDay.error.message,
-      },
-      { status: 500 }
-    );
-  }
+      if (task.error) {
+        return NextResponse.json(
+          {
+            success: false,
+            step: "find_task",
+            error: task.error.message,
+          },
+          { status: 500 }
+        );
+      }
 
-  if (!taskDay.data) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Task has not been started",
-      },
-      { status: 404 }
-    );
-  }
+      if (!task.data) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Task not found",
+          },
+          { status: 404 }
+        );
+      }
 
-  if (taskDay.data.status === "completed") {
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Task is already completed",
-        taskDay: taskDay.data,
-      },
-      { status: 409 }
-    );
-  }
+      /* Find the current task day */
 
-  // Find the currently running interval
-  const openInterval = await supabase
-    .from("task_intervals")
-    .select("*")
-    .eq("participant_id", participantId)
-    .eq("task_id", taskId)
-    .eq("day_key", dayKey)
-    .is("ended_at", null)
-    .maybeSingle();
+      const taskDay = await supabase
+        .from("task_days")
+        .select("*")
+        .eq("participant_id", participantId)
+        .eq("task_id", taskId)
+        .eq("day_key", dayKey)
+        .maybeSingle();
 
-  if (openInterval.error) {
-    return NextResponse.json(
-      {
-        success: false,
-        step: "find_open_interval",
-        error: openInterval.error.message,
-      },
-      { status: 500 }
-    );
-  }
+      if (taskDay.error) {
+        return NextResponse.json(
+          {
+            success: false,
+            step: "find_task_day",
+            error: taskDay.error.message,
+          },
+          { status: 500 }
+        );
+      }
 
-  // Close the running interval if one exists
-  let interval = openInterval.data;
+      if (!taskDay.data) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Task has not been started",
+          },
+          { status: 404 }
+        );
+      }
 
-  if (interval) {
-    const intervalResult = await supabase
-      .from("task_intervals")
-      .update({
-        ended_at: Math.max(now, interval.started_at),
-      })
-      .eq("id", interval.id)
-      .select()
-      .single();
+      if (taskDay.data.status === "completed") {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Task is already completed",
+            taskDay: taskDay.data,
+          },
+          { status: 409 }
+        );
+      }
 
-    if (intervalResult.error) {
-      return NextResponse.json(
-        {
-          success: false,
-          step: "close_interval",
-          error: intervalResult.error.message,
-        },
-        { status: 500 }
-      );
+      /* Find the currently running interval */
+
+      const openInterval = await supabase
+        .from("task_intervals")
+        .select("*")
+        .eq("participant_id", participantId)
+        .eq("task_id", taskId)
+        .eq("day_key", dayKey)
+        .is("ended_at", null)
+        .maybeSingle();
+
+      if (openInterval.error) {
+        return NextResponse.json(
+          {
+            success: false,
+            step: "find_open_interval",
+            error: openInterval.error.message,
+          },
+          { status: 500 }
+        );
+      }
+
+      /* Close the running interval if one exists */
+
+      let interval = openInterval.data;
+
+      if (interval) {
+        const intervalResult = await supabase
+          .from("task_intervals")
+          .update({
+            ended_at: Math.max(
+              now,
+              interval.started_at
+            ),
+          })
+          .eq("id", interval.id)
+          .eq("participant_id", participantId)
+          .select()
+          .single();
+
+        if (intervalResult.error) {
+          return NextResponse.json(
+            {
+              success: false,
+              step: "close_interval",
+              error: intervalResult.error.message,
+            },
+            { status: 500 }
+          );
+        }
+
+        interval = intervalResult.data;
+      }
+
+      /* Mark task as completed */
+
+      const completedTaskDay = await supabase
+        .from("task_days")
+        .update({
+          status: "completed",
+          completed_at: now,
+        })
+        .eq("participant_id", participantId)
+        .eq("task_id", taskId)
+        .eq("day_key", dayKey)
+        .select()
+        .single();
+
+      if (completedTaskDay.error) {
+        return NextResponse.json(
+          {
+            success: false,
+            step: "complete_task_day",
+            error: completedTaskDay.error.message,
+          },
+          { status: 500 }
+        );
+      }
+
+      /* Log activity */
+
+      const log = await supabase
+        .from("activity_log")
+        .insert({
+          participant_id: participantId,
+          task_id: taskId,
+          day_key: dayKey,
+          event: "complete_task",
+          at: now,
+          detail: null,
+        });
+
+      if (log.error) {
+        return NextResponse.json(
+          {
+            success: false,
+            step: "activity_log",
+            error: log.error.message,
+          },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        action: "complete_task",
+        task: task.data,
+        taskDay: completedTaskDay.data,
+        interval,
+      });
     }
 
-    interval = intervalResult.data;
-  }
-
-  // Mark task as completed
-  const completedTaskDay = await supabase
-    .from("task_days")
-    .update({
-      status: "completed",
-      completed_at: now,
-    })
-    .eq("participant_id", participantId)
-    .eq("task_id", taskId)
-    .eq("day_key", dayKey)
-    .select()
-    .single();
-
-  if (completedTaskDay.error) {
-    return NextResponse.json(
-      {
-        success: false,
-        step: "complete_task_day",
-        error: completedTaskDay.error.message,
-      },
-      { status: 500 }
-    );
-  }
-
-  // Log activity
-  const log = await supabase
-    .from("activity_log")
-    .insert({
-      participant_id: participantId,
-      task_id: taskId,
-      day_key: dayKey,
-      event: "complete_task",
-      at: now,
-      detail: null,
-    });
-
-  if (log.error) {
-    return NextResponse.json(
-      {
-        success: false,
-        step: "activity_log",
-        error: log.error.message,
-      },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({
-    success: true,
-    action: "complete_task",
-    task: task.data,
-    taskDay: completedTaskDay.data,
-    interval,
-  });
-}
+    /* =========================================================
+       UNKNOWN ACTION
+       ========================================================= */
 
     return NextResponse.json(
       {
@@ -694,12 +728,25 @@ if (action === "complete_task") {
       { status: 400 }
     );
   } catch (error) {
+    if (error instanceof HttpError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+        },
+        { status: error.status }
+      );
+    }
+
     console.error("Action API error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
       },
       { status: 500 }
     );
