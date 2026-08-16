@@ -3349,33 +3349,67 @@ function wire() {
 async function submitPin() {
   const p = personById(ui.pickedId);
   if (!p) return;
-  if (throttled(p.id)) { ui.error = t('tooMany'); render(); return; }
+
+  if (throttled(p.id)) {
+    ui.error = t('tooMany');
+    render();
+    return;
+  }
 
   const pin1 = (document.getElementById('pin1') || {}).value || '';
   const first = p.mustSetPin || !p.pinHash;
-  if (!new RegExp('^\\d{' + PIN_LEN + '}$').test(pin1)) { ui.error = t('pinFormat'); render(); return; }
+
+  if (!new RegExp('^\\d{' + PIN_LEN + '}$').test(pin1)) {
+    ui.error = t('pinFormat');
+    render();
+    return;
+  }
 
   if (first) {
     const pin2 = (document.getElementById('pin2') || {}).value || '';
-    if (pin1 !== pin2) { ui.error = t('pinMismatch'); render(); return; }
+
+    if (pin1 !== pin2) {
+      ui.error = t('pinMismatch');
+      render();
+      return;
+    }
+
     p.pinSalt = newSalt();
     p.pinHash = await hashPin(pin1, p.pinSalt);
     p.mustSetPin = false;
+
     logEvent(p.id, 'pin_set');
+
   } else {
     const h = await hashPin(pin1, p.pinSalt);
-    if (h !== p.pinHash) { noteFail(p.id); ui.error = t('wrongPin'); render(); return; }
+
+    if (h !== p.pinHash) {
+      noteFail(p.id);
+      ui.error = t('wrongPin');
+      render();
+      return;
+    }
   }
 
   delete attempts[p.id];
+
   state.session = p.id;
-  localStorage.setItem('rehla.session', String(p.id));
+
+  localStorage.setItem(
+    'rehla.session',
+    String(p.id)
+  );
+
   ui.error = '';
   ui.pickedId = null;
 
-  // Persist the PIN and participant state before showing the dashboard.
-  await save();
+  // Open dashboard immediately
   render();
+
+  // Save in background
+  save().catch((error) => {
+    console.error('Background save failed:', error);
+  });
 }
 
 function wireAdmin() {
