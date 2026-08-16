@@ -385,7 +385,20 @@
   }
   .pinrow { display: flex; gap: 8px; }
   .pinrow input { flex: 1; text-align: center; letter-spacing: 0.55em; font-family: var(--mono); font-size: 1.15rem; padding-inline-start: 0.55em; }
-  .err { color: var(--bad); font-size: 0.86rem; margin: 0; min-height: 1.2em; }
+  .err {
+  color: var(--bad);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 10px 0 0;
+  min-height: 1.2em;
+  text-align: center;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.err.visible {
+  opacity: 1;
+}
 
   .veil {
     position: fixed; inset: 0; background: rgba(6, 10, 13, 0.62);
@@ -441,6 +454,538 @@
     .wrap { max-width: none; padding: 0; }
   }
   .printonly { display: none; }
+
+
+
+
+
+  /* =========================================================
+   MOBILE + UI POLISH
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding-inline: clamp(12px, 3vw, 28px);
+}
+
+.card,
+.section,
+.stack,
+.cols,
+.body,
+.topbar,
+.tabs,
+.daynav,
+.summary,
+.board,
+.task {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.card {
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.card header {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.card header h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+input,
+textarea,
+select,
+button {
+  max-width: 100%;
+  font: inherit;
+}
+
+input,
+textarea {
+  min-width: 0;
+}
+
+button {
+  min-height: 40px;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll table {
+  min-width: 560px;
+}
+
+/* ---------- Top navigation ---------- */
+
+.topbar {
+  gap: 12px;
+}
+
+.brand {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.brand h1 {
+  overflow-wrap: anywhere;
+}
+
+.brand small {
+  overflow-wrap: anywhere;
+}
+
+.tabs,
+.jump {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.jump {
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.jump button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* ---------- Tasks ---------- */
+
+.task {
+  min-width: 0;
+}
+
+.task > * {
+  min-width: 0;
+}
+
+.tname,
+.task-name,
+.nm,
+.hint,
+.note,
+.tnoteread {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.tactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tactions button {
+  flex: 0 0 auto;
+}
+
+/* ---------- Admin ---------- */
+
+.adminwrap {
+  overflow: hidden;
+}
+
+.formrow {
+  width: 100%;
+}
+
+.formrow input[type="text"] {
+  min-width: 0;
+}
+
+.field textarea {
+  width: 100%;
+  min-height: 100px;
+  resize: vertical;
+}
+
+.adminwrap .scroll {
+  border-radius: 10px;
+}
+
+.adminwrap table {
+  width: 100%;
+}
+
+.adminwrap td {
+  vertical-align: middle;
+}
+
+.adminwrap td:last-child {
+  white-space: nowrap;
+}
+
+/* ---------- Login ---------- */
+
+.login {
+  width: min(100%, 500px);
+  margin-inline: auto;
+  padding: clamp(12px, 4vw, 28px) 0;
+}
+
+.login .topbar {
+  width: 100%;
+}
+
+.login .card {
+  width: 100%;
+}
+
+.pinrow {
+  width: 100%;
+}
+
+.pinrow input {
+  width: 100%;
+  min-height: 54px;
+  text-align: center;
+  letter-spacing: 0.45em;
+  font-size: 1.15rem;
+}
+
+.err {
+  min-height: 24px;
+  padding: 0 4px;
+  font-weight: 700;
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 700px) {
+
+  body {
+    font-size: 15px;
+  }
+
+  .wrap {
+    padding-inline: 10px;
+  }
+
+  .topbar {
+    padding-block: 12px;
+    gap: 9px;
+    align-items: center;
+  }
+
+  .brand h1 {
+    font-size: 1.05rem;
+  }
+
+  .brand small {
+    font-size: 0.72rem;
+  }
+
+  .mark {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+  }
+
+  .topbar > button {
+    min-height: 36px;
+    padding-inline: 10px;
+  }
+
+  .jump {
+    margin-block: 8px 12px;
+    gap: 6px;
+  }
+
+  .jump button {
+    min-height: 38px;
+    padding-inline: 11px;
+    font-size: 0.78rem;
+  }
+
+  .card {
+    border-radius: 13px;
+  }
+
+  .card header {
+    padding: 12px 13px;
+  }
+
+  .card .body {
+    padding: 13px;
+  }
+
+  .summary {
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .stat {
+    width: 100%;
+  }
+
+  .cols {
+    gap: 12px;
+  }
+
+  .stack {
+    gap: 12px;
+  }
+
+  /* Tasks become comfortable touch cards */
+  .task {
+    gap: 10px;
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .tactions {
+    width: 100%;
+  }
+
+  .tactions button {
+    min-height: 42px;
+    flex: 1 1 auto;
+  }
+
+  /* Admin controls */
+  .formrow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .formrow input[type="text"] {
+    width: 100%;
+  }
+
+  .formrow .check {
+    width: 100%;
+  }
+
+  .formrow button {
+    width: 100%;
+  }
+
+  .adminwrap td:last-child {
+    white-space: normal;
+  }
+
+  .adminwrap td:last-child button {
+    margin: 2px;
+  }
+
+  /* Login */
+  .login {
+    min-height: calc(100dvh - 20px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: 20px;
+  }
+
+  .login .topbar {
+    margin-bottom: 12px !important;
+  }
+
+  .login .card {
+    box-shadow: 0 12px 35px rgba(0, 0, 0, .22);
+  }
+
+  .login .body {
+    padding: 16px;
+  }
+
+  .pinrow input {
+    min-height: 58px;
+    font-size: 1.25rem;
+  }
+
+  .login form > div:last-child {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px !important;
+  }
+
+  .login form button {
+    min-height: 46px;
+  }
+
+  /* Streak / statistics boxes */
+  .sbox {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .board .row {
+    min-width: 0;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .board .row .nm {
+    min-width: 0;
+  }
+
+  /* Don't let long Arabic names break the page */
+  .nm,
+  .pc,
+  .rk {
+    min-width: 0;
+  }
+
+  /* Tables stay readable and scroll horizontally inside their card */
+  .scroll {
+    margin-inline: -2px;
+    max-width: calc(100% + 4px);
+  }
+
+  .scroll table {
+    min-width: 620px;
+  }
+
+  /* Buttons */
+  button.sm {
+    min-height: 38px;
+  }
+
+  .toast {
+    bottom: 12px;
+    max-width: calc(100vw - 24px);
+    text-align: center;
+  }
+}
+
+/* ---------- Very small phones ---------- */
+
+@media (max-width: 420px) {
+
+  .wrap {
+    padding-inline: 7px;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    flex-basis: 100%;
+  }
+
+  .topbar > .pill {
+    order: 3;
+  }
+
+  .topbar > button {
+    flex: 1 1 auto;
+  }
+
+  .card header h2 {
+    font-size: 0.98rem;
+  }
+
+  .card .body {
+    padding: 11px;
+  }
+
+  .summary {
+    padding: 10px;
+  }
+
+  .stat .big {
+    font-size: 1.45rem;
+  }
+
+  .login {
+    padding-inline: 3px;
+  }
+
+  .login .brand {
+    flex-basis: auto;
+  }
+
+  .login .topbar > button {
+    flex: 0 0 auto;
+  }
+
+  .login form > div:last-child {
+    grid-template-columns: 1fr;
+  }
+
+  .login form > div:last-child button {
+    width: 100%;
+  }
+
+  .jump button {
+    font-size: 0.74rem;
+    padding-inline: 9px;
+  }
+}
+
+/* ---------- Better touch / visual polish ---------- */
+
+@media (hover: hover) {
+  button:not(:disabled) {
+    transition:
+      transform .15s ease,
+      border-color .15s ease,
+      background .15s ease,
+      box-shadow .15s ease;
+  }
+
+  button:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Prevent accidental horizontal page scrolling */
+#app {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
 </style>
 
 <div class="wrap" id="app"></div>
@@ -1331,13 +1876,21 @@ function render() {
     document.getElementById('pinform');
 
   if (isLoginForm && ui.pickedId) {
-    /*
-     * Login screen already exists.
-     * Keep the current inputs and only update document direction/language.
-     */
-    tick();
-    return;
+  /*
+   * Keep the current PIN inputs, but update the error message
+   * without rebuilding the login form.
+   */
+  const errorEl = document.querySelector('#pinform .err');
+
+  if (errorEl) {
+    errorEl.textContent = ui.error || '';
   }
+
+  errorEl?.classList.toggle('visible', !!ui.error);
+
+  tick();
+  return;
+}
 
   app().innerHTML = state.session ? viewDashboard() : viewLogin();
 
